@@ -10,14 +10,14 @@ Lab Manager v2.0 is an enterprise-grade utility engineered to automate the confi
 
 ## 🎯 Deep-Dive Functionality & Modules
 
-### 1. ⚡ Asynchronous Network Auditing Module
+### 1. Asynchronous Network Auditing Module
 
 Built within `core/network.py`, this module handles hardware connectivity mapping across the lab subnet.
 
 * **Concurrent Execution:** Rather than pinging workstations sequentially—which causes terminal freeze—the engine wraps the process in a `concurrent.futures.ThreadPoolExecutor`. This allows it to run multiple network sweeps across target subnets concurrently.
 * **Robust Type Guarding:** Implements strict data validation layers. Every incoming ping result is explicitly checked before UI rendering to completely eliminate runtime crashes caused by unexpected network packet loss or invalid IP addresses.
 
-### 2. 📂 Non-Recursive Surface Sorter Engine
+### 2. Non-Recursive Surface Sorter Engine
 
 Located within `core/file_sorter.py`, this is a highly optimized flat-file grouping utility specifically written to organize scattered video assets without nested directory traversal.
 
@@ -25,14 +25,14 @@ Located within `core/file_sorter.py`, this is a highly optimized flat-file group
 * **Regex Token Extraction:** Uses a customized regular expression pattern (`re.compile`) to match common media tracking tags. It cleanly extracts titles from patterns containing full season listings (`S01E03`), standalone episode identifiers (`E05`, `e12`), or classic structures (`2x14`).
 * **Atomic Remapping:** Once titles are filtered and formatted to Title Case, files are safely and dynamically moved into fresh, dedicated series folders using `shutil.move`.
 
-### 3. 📦 Smart Backup, Git, & Venv Pipelines
+### 3. Smart Backup, Git, & Venv Pipelines
 
-A specialized disaster recovery mechanism designed to make workstation projects highly portable.
+A specialized recovery mechanism designed to make workstation projects highly portable.
 
 * **Smart Compression (`core/backup.py`):** Recursively backs up active project source files while reading your configuration settings to exclude heavy, non-essential data bloat. It strips dependencies and hidden files automatically.
 * **Workspace Replication (`core/git.py` & `core/venv.py`):** Automatically interfaces with remote repositories to handle cloning operations, while the virtual environment module dynamically provisions isolated Python sandboxes on completely fresh systems.
 
-### 4. 🧰 Integrated Utilities Framework
+### 4. Integrated Utilities Framework
 
 The newly added `utils/` directory serves as the shared services backend for the entire ecosystem:
 
