@@ -1,0 +1,87 @@
+{
+    "GENERAL": {
+        "first_run": false
+    },
+    "NETWORK": {
+        "default_port": 5050,
+        "max_port_attempts": 5,
+        "auto_scan_on_startup": true,
+        "ping_timeout": 500
+    },
+    "BACKUP": {
+        "default_destination": "lab_manager_backups",
+        "extensions": {
+            "Images": [
+                ".jpg",
+                ".png",
+                ".jpeg",
+                ".jfif",
+                ".jp2",
+                ".heic",
+                ".ico"
+            ],
+            "Audio": [
+                ".mp3",
+                ".wav"
+            ],
+            "Videos": [
+                ".mp4",
+                ".mkv"
+            ],
+            "Documents": [
+                ".pdf",
+                ".docx",
+                ".txt",
+                ".pptx",
+                ".xlsx",
+                ".epub"
+            ],
+            "Code": [
+                ".py",
+                ".cpp",
+                ".js",
+                ".css",
+                ".json",
+                ".ipynb",
+                ".ini"
+            ],
+            "Archives": [
+                ".zip",
+                ".rar",
+                ".aac"
+            ],
+            "Subtitles": [
+                ".srt",
+                ".ass"
+            ],
+            "Executables": [
+                ".exe",
+                ".apk",
+                ".msi"
+            ],
+            "Others": []
+        },
+        "forbidden_extensions": [
+            ".exe",
+            ".msi",
+            ".bat",
+            ".cmd",
+            ".sys",
+            ".dll",
+            ".lnk"
+        ],
+        "ignored_folders": [
+            "venv",
+            ".git",
+            "__pycache__",
+            "node_modules",
+            "backup_staging",
+            "lab_manager_backups"
+        ],
+        "default_sources": []
+    },
+    "SECURITY": {
+        "manage_firewall_rules": true,
+        "require_admin_privileges": false
+    }
+}
