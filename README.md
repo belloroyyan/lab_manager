@@ -74,6 +74,7 @@ lab_manager/
 │
 ├── build.bat            # Automated PyInstaller compilation script
 └── main.py              # Application runtime bootstrapper
+└── config.py            # Key variables & paths storage
 └── settings.json        # Dynamic software settings
 └── main.exe             # Precompiled runnable executable
 
