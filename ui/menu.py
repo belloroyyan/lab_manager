@@ -1,4 +1,4 @@
-from ui.handler import (handle_plem, handle_sort, handle_backup, handle_git, handle_log, handle_venv, handle_network, handle_help, handle_settings, handle_syscheck, handle_io)
+from ui.handler import (handle_plem, handle_sort, handle_backup, handle_git, handle_log, handle_venv, handle_network, handle_help, handle_settings, handle_syscheck, handle_io, handle_cleanup)
 from utils.execute import clear_shell_wi
 from utils.logger import log_manager
 from utils.settings import load_settings, save_settings, init_settings
@@ -38,7 +38,8 @@ def display_dashboard():
     print("  [5] Virtual Environment")
     print("  [6] Run Network Tests and Commands")
     print("  [7] System Checks and Health")
-    print("  [8] I/O")
+    print("  [8] Cleanup Operations")
+    print("  [9] I/O")
     print("\n  [L] Logs")
     print("  [S] Settings")
     print("  [H] Read Help Manual")
@@ -92,6 +93,10 @@ def display_menu():
             clear_shell_wi()
             handle_network()
         elif choice == "8":
+            time.sleep(1)
+            clear_shell_wi()
+            handle_cleanup()
+        elif choice == "9":
             time.sleep(1)
             clear_shell_wi()
             handle_io()

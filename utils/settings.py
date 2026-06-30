@@ -1,4 +1,4 @@
-import json
+import json, os
 from colorama import Fore, Style, init
 from config import SETTINGS
 from utils.logger import log_manager
@@ -9,16 +9,18 @@ green = Fore.GREEN
 red = Fore.RED
 reset = Style.RESET_ALL
 logger = log_manager.get_logger("Settings")
+home = os.path.expanduser("~")
 
 DEFAULT_SETTINGS = {
     "GENERAL" : {
-        "first_run" : True
+        "first_run" : True,
+        "lab_name" : "UNIOSUN FOCIT Lab"
     },
     "NETWORK": {
         "default_port": 5050,
         "max_port_attempts": 5,
         "auto_scan_on_startup": True,
-        "ping_timeout" : 500
+        "ping_timeout" : "500"
     },
     "BACKUP": {
         "default_destination": "lab_manager_backups",
@@ -36,6 +38,22 @@ DEFAULT_SETTINGS = {
         "forbidden_extensions": [".exe", ".msi", ".bat", ".cmd", ".sys", ".dll", ".lnk"],
         "ignored_folders": ["venv", ".git", "__pycache__", "node_modules", "backup_staging", "lab_manager_backups"],
         "default_sources": []
+    },
+    "SOFTWARE_CHECKS" : {
+        "Python" : {
+            "command" : ["py", "python", "python3"],
+            "paths" : [r"C:/Python312/python.exe", r"C:/Program Files/Python312/python.exe", f"{home}\\AppData\\Local\\Programs\\Python\\Python312\\python.exe", r"C:/Python311/python.exe", r"C:/Program Files/Python311/python.exe", f"{home}\\AppData\\Local\\Programs\\Python\\Python311\\python.exe", r"C:/Python313/python.exe", r"C:/Program Files/Python313/python.exe", f"{home}\\AppData\\Local\\Programs\\Python\\Python313\\python.exe", r"C:/Python314/python.exe", r"C:/Program Files/Python314/python.exe", f"{home}\\AppData\\Local\\Programs\\Python\\Python314\\python.exe"],
+            "version_flag" : "--version"
+        },
+        "VS Code" : {
+            "command" : ["code"],
+            "paths" : [r"C:\Users\Kato\AppData\Local\Programs\Microsoft VS Code\Code.exe"],
+            "version_flag" : "-v"
+        },
+        "Git" : {
+            "command" : ["git"],
+            "paths" : [r"C:/Program Files/Git"]
+        }
     },
     "SECURITY": {
         "manage_firewall_rules": True,
@@ -95,7 +113,7 @@ def edit_string_setting(section, key):
     if not user_input:
         print("Modification cancelled.")
         return
-    config[section][key] = user_input
+    config[section][key] = str(user_input)
     save_settings(config)
     print(f"[SUCCESS] {key} updated to {user_input}!")
 

@@ -74,6 +74,15 @@ class NetworkHandler():
         save_device(ip, f'Device-{ip.split('.')[-1]}', found_port, 'ONLINE')
         logger.info(f"Saved {ip} with port {found_port} to database.")
 
+    def get_my_ip(self):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 0))
+            my_ip = s.getsockname()[0]
+            return my_ip
+        except Exception as e:
+            print(f"{Fore.RED}Connection failed. {Style.RESET_ALL}{e}")
+
     def scan_entire_lan(self):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -119,7 +128,7 @@ class NetworkHandler():
     def broadcast_msg(self, ip, msg, port=8088):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
-            print(f"Sending message to {ip}...")
+            print(f"-> Sending message to {ip}...")
             s.sendto(msg.encode('utf-8'), (ip, port))
         except Exception as e:
             print(f"{Fore.YELLOW}Failed to send message to {ip}{Style.RESET_ALL}")

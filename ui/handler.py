@@ -3,6 +3,8 @@ from core.git import GitHandler
 from core.venv import VenvHandler
 from core.network import NetworkHandler
 from core.backup import BackupManager
+from core.cleanup import CleanupManager
+from core.inventory import gen_soft_report, generate_lan_system_report
 from utils.drive_manager import get_drives
 from utils.execute import clear_shell
 from utils.database import get_all_saved_devices
@@ -10,6 +12,7 @@ from utils.logger import log_manager
 from utils.help import display_help
 from utils.settings import (init_settings, display_all_settings, load_settings, edit_numeric_setting, edit_boolean_setting, edit_list_setting, edit_string_setting, save_settings, get_min_max)
 from utils.shell import open_shell_access
+from utils.listener import start_listener
 from config import (CYAN, BOLD, GREEN, YELLOW, GRAY, RED, PROJECT_ROOT, BACKUP_DIR)
 from colorama import Fore, Back, Style, init
 
@@ -162,6 +165,7 @@ def handle_network():
   [2] Broadcast Message
   [3] Change Default Listening Port
   [4] Retrieved Stored Records
+  [5] Start Listener
   [0] Back to Main Menu""")
     print("----------------------------------------------------------------------\n")
     choice = input(F"{GREEN}Select what network operation you wish to perform: {RESET}").strip()
@@ -184,6 +188,8 @@ def handle_network():
         devices = get_all_saved_devices()
         for dev in devices:
             print(dev)
+    elif choice == '5':
+        start_listener(8088)
     elif choice == "0":
         return
     else : print("Invalid choice.")
@@ -206,14 +212,51 @@ def handle_io():
 ======================================================================
 
   [1] Open Shell Access
+  [2] Run Inventory Check
+  [3] Run Inventory Check Across LAN
   [0] Back to Main Menu""")
     print("----------------------------------------------------------------------\n")
     choice = input(f"{GREEN}Select what i/o operation you wish to perform: {RESET}").strip()
     if choice == "1":
         open_shell_access()
+    elif choice == "2":
+        gen_soft_report()
+    elif choice == "3":
+        generate_lan_system_report()
     elif choice == "0":
         return
     else: print("Invalid choice.")
+    clear_shell()
+
+def handle_cleanup():
+    cleanuphandler = CleanupManager()
+    print(f"""======================================================================
+                                CLEANUP MENU                        
+======================================================================
+
+  [1] Show Top Space Consumers
+  [2] Clean Temporary Files
+  [3] Empty Recycle Bin
+  [4] Move Large Files to Review Folder
+  [0] Back to Main Menu""")
+    print("----------------------------------------------------------------------\n")
+    choice = input(f"{GREEN}Select what cleanup operation you wish to perform: {RESET}").strip()
+    if choice == "1":
+        path = input(f"{GREEN}Enter path to analyze (leave blank for user folder): {RESET}").strip()
+        cleanuphandler.show_top_space_consumers(path if path else None)
+    elif choice == "2":
+        cleanuphandler.clean_temp_files()
+    elif choice == "3":
+        cleanuphandler.empty_recycle_bin()
+    elif choice == "4":
+        path = input(f"{GREEN}Enter path to scan for large files: {RESET}").strip()
+        size = input(f"{GREEN}Minimum size in MB to move (default 100): {RESET}").strip()
+        min_size = int(size) if size.isdigit() else 100
+        cleanuphandler.move_large_files_to_review(path, min_size)
+    elif choice == "0":
+        pass
+    else:
+        print("Invalid choice.")
     clear_shell()
 
 def handle_settings():
