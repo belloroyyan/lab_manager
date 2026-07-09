@@ -1,0 +1,132 @@
+{
+    "GENERAL": {
+        "first_run": false,
+        "lab_name": "UNIOSUN FOCIT Lab"
+    },
+    "NETWORK": {
+        "default_port": 5050,
+        "max_port_attempts": 5,
+        "auto_scan_on_startup": true,
+        "ping_timeout": "500"
+    },
+    "BACKUP": {
+        "default_destination": "lab_manager_backups",
+        "extensions": {
+            "Images": [
+                ".jpg",
+                ".png",
+                ".jpeg",
+                ".jfif",
+                ".jp2",
+                ".heic",
+                ".ico"
+            ],
+            "Audio": [
+                ".mp3",
+                ".wav"
+            ],
+            "Videos": [
+                ".mp4",
+                ".mkv"
+            ],
+            "Documents": [
+                ".pdf",
+                ".docx",
+                ".txt",
+                ".pptx",
+                ".xlsx",
+                ".epub"
+            ],
+            "Code": [
+                ".py",
+                ".cpp",
+                ".js",
+                ".css",
+                ".json",
+                ".ipynb",
+                ".ini"
+            ],
+            "Archives": [
+                ".zip",
+                ".rar",
+                ".aac"
+            ],
+            "Subtitles": [
+                ".srt",
+                ".ass"
+            ],
+            "Executables": [
+                ".exe",
+                ".apk",
+                ".msi"
+            ],
+            "Others": []
+        },
+        "forbidden_extensions": [
+            ".exe",
+            ".msi",
+            ".bat",
+            ".cmd",
+            ".sys",
+            ".dll",
+            ".lnk",
+            ".spec"
+        ],
+        "ignored_folders": [
+            "venv",
+            ".git",
+            "__pycache__",
+            "node_modules",
+            "backup_staging",
+            "lab_manager_backups"
+        ],
+        "default_sources": [],
+        "default_venv_destination": "C:\\Users\\Kato\\Desktop"
+    },
+    "SOFTWARE_CHECKS": {
+        "Python": {
+            "command": [
+                "py",
+                "python",
+                "python3"
+            ],
+            "paths": [
+                "C:/Python312/python.exe",
+                "C:/Program Files/Python312/python.exe",
+                "C:\\Users\\Kato\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+                "C:/Python311/python.exe",
+                "C:/Program Files/Python311/python.exe",
+                "C:\\Users\\Kato\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+                "C:/Python313/python.exe",
+                "C:/Program Files/Python313/python.exe",
+                "C:\\Users\\Kato\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+                "C:/Python314/python.exe",
+                "C:/Program Files/Python314/python.exe",
+                "C:\\Users\\Kato\\AppData\\Local\\Programs\\Python\\Python314\\python.exe"
+            ],
+            "version_flag": "--version"
+        },
+        "VS Code": {
+            "command": [
+                "code"
+            ],
+            "paths": [
+                "C:\\Users\\Kato\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+            ],
+            "version_flag": "--v"
+        },
+        "Git": {
+            "command": [
+                "git"
+            ],
+            "paths": [
+                "C:/Program Files/Git"
+            ],
+            "version_flag": "-v"
+        }
+    },
+    "SECURITY": {
+        "manage_firewall_rules": true,
+        "require_admin_privileges": false
+    }
+}
