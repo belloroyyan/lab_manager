@@ -113,8 +113,36 @@ def create_lab_report(data: dict):
         pdf.ln(6)
 
     # Save output locally
-    pdf.output("Lab Report.pdf")
-    print("[+] Professional PDF generated successfully as 'FOCIT_Lab_Report.pdf'!")
+    from config import REPORT_DIR
+    report_path = REPORT_DIR / "FOCIT_Lab_Report.pdf"
+    pdf.output(str(report_path))
+    print(f"[+] Professional PDF generated successfully as '{report_path}'!")
 
 if __name__ == "__main__":
-    create_lab_report()
+    # Default test data for running this module directly
+    sample_data = {
+        "status": [5, 2],
+        "critical": 1,
+        "security": 0,
+        "devices": [
+            {
+                "status": "HEALTHY",
+                "agent_id": "TEST-PC-01",
+                "bench": "Bench A",
+                "ip_on_lan": "192.168.1.10",
+                "mac_address": "AA:BB:CC:DD:EE:FF",
+                "cpu_name": "Intel i5",
+                "cores_physical": 4,
+                "logical": 8,
+                "ram_total_gb": 16,
+                "ram_used_percent": 45,
+                "storage": [{"total_gb": 500, "free_gb": 250, "used_percent": 50}],
+                "platform": "Windows",
+                "release": "10",
+                "version": "19045",
+                "uptime": 86400,
+                "note": ["All systems operational"]
+            }
+        ]
+    }
+    create_lab_report(sample_data)

@@ -23,7 +23,7 @@ def get_agent_data():
     current_user = os.path.expanduser("~")
     storage_info = []
     for part in psutil.disk_partitions(all=False):
-        if os_name := platform.system() == "Windows" and "cdrom" in part.opts:
+        if (os_name := platform.system()) == "Windows" and "cdrom" in part.opts:
             continue
         try:
             usage = psutil.disk_usage(part.mountpoint)
@@ -86,6 +86,8 @@ def get_agent_data():
     return json.dumps(payload, indent=2)
 
 def start_listener(port=8088):
+    # TODO: add auth
+    # TODO: encrpyt res
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     try:
