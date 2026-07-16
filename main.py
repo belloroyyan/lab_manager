@@ -14,9 +14,14 @@ def main():
         logger = log_manager.get_logger("Tester")
         logger.info(f"Session launched at {time.ctime()}")
         display_menu()
-    except KeyboardInterrupt, EOFError:
+    except (KeyboardInterrupt, EOFError):
         print(f"\n\n{colorama.Fore.RED}    FORCEFULLY exiting...{colorama.Style.RESET_ALL}")
         logger.critical(f"Forceful exit at {time.ctime()}")
+        time.sleep(1)
+        return
+    except Exception as e:
+        print(f"\n\n{colorama.Fore.RED}    UNHANDLED CRASH{colorama.Style.RESET_ALL}")
+        logger.critical(f"Forceful exit at {time.ctime()} due to error : {e}")
         time.sleep(1)
         return
 

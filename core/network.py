@@ -18,7 +18,7 @@ class NetworkHandler():
         config = load_settings()
         ping_timeout = config["NETWORK"]["ping_timeout"]
         param = '-n' if platform.system().lower() == 'windows' else '-c'
-        command = ['ping', param, '1', '-w', ping_timeout if not None else '500', ip]
+        command = ['ping', param, '1', '-w', ping_timeout if ping_timeout else '500', ip]
         response = subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return ip if response.returncode == 0 else None
 

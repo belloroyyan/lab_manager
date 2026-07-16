@@ -23,7 +23,7 @@ def get_agent_data():
     current_user = os.path.expanduser("~")
     storage_info = []
     for part in psutil.disk_partitions(all=False):
-        if os_name := platform.system() == "Windows" and "cdrom" in part.opts:
+        if (os_name := platform.system()) == "Windows" and "cdrom" in part.opts:
             continue
         try:
             usage = psutil.disk_usage(part.mountpoint)

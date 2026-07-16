@@ -15,7 +15,7 @@ def init_db():
     try:
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS devices (
-                    ip_address TEXT PRIMARY_KEY,
+                    ip_address TEXT PRIMARY KEY,
                     hostname TEXT,
                     port_no INTEGER,
                     status TEXT,
