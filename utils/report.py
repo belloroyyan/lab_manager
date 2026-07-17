@@ -1,13 +1,16 @@
+import os
 from fpdf import FPDF
 from datetime import datetime
+from utils.settings import load_settings
+
+config = load_settings()
+
 
 class LabReportPDF(FPDF):
     def header(self):
-        # Top banner decoration
-        self.set_fill_color(26, 54, 93) # Deep Blue
+        self.set_fill_color(26, 54, 93)
         self.rect(0, 0, 210, 40, 'F')
-        
-        # Title text
+
         self.set_font("Helvetica", "B", 18)
         self.set_text_color(255, 255, 255)
         self.cell(0, 10, "FOCIT LAB MANAGER CENTRAL REPORT", ln=True, align="C")
@@ -15,7 +18,7 @@ class LabReportPDF(FPDF):
         self.set_font("Helvetica", "", 10)
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.cell(0, 5, f"Generated: {current_time} | Scope: Main Computer Lab", ln=True, align="C")
-        self.ln(15) # Spacing below header
+        self.ln(15)
 
     def footer(self):
         self.set_y(-15)
@@ -29,15 +32,14 @@ def create_lab_report(data: dict):
     pdf.add_page()
     
     # -------------------------------------------------------------------------
-    # 1. EXECUTIVE SUMMARY SECTION
+    # 1. SUMMARY SECTION
     # -------------------------------------------------------------------------
     pdf.set_font("Helvetica", "B", 14)
     pdf.set_text_color(26, 54, 93)
     pdf.cell(0, 10, "1. Executive KPI Summary", ln=True)
-    pdf.line(10, pdf.get_y(), 200, pdf.get_y()) # Decorative horizontal rule
+    pdf.line(10, pdf.get_y(), 200, pdf.get_y())
     pdf.ln(4)
     
-    # Draw a shaded summary box
     pdf.set_fill_color(240, 244, 248)
     pdf.set_text_color(0, 0, 0)
     pdf.set_font("Helvetica", "", 11)
@@ -58,8 +60,6 @@ def create_lab_report(data: dict):
     pdf.cell(0, 10, "2. Expanded Asset Inventory", ln=True)
     pdf.line(10, pdf.get_y(), 200, pdf.get_y())
     pdf.ln(5)
-
-    # Mock structured data incorporating your logs + professional elements
     raw_devs = data.get("devices", {})
     devices = []
     for dev in raw_devs:
@@ -69,7 +69,7 @@ def create_lab_report(data: dict):
         device["bench"] = dev.get("bench", "N/A")
         device["ip"] = dev.get("ip_on_lan", "N/A")
         device["mac"] = dev.get("mac_address", "N/A")
-        device["cpu"] = f"{dev.get("cpu_name", "N/A")} ({dev.get("cores_physical", "?")} Cores / {dev.get("logical", "?")} Threads)"
+        device["cpu"] = f"{dev.get("cpu_name", "N/A")} ({dev.get("cores_physical", "?")} Cores / {dev.get("cores_logical", "?")} Threads)"
         device["ram"] = f"{dev.get("ram_total_gb", "?")} GB ({dev.get("ram_used_percent", "?")}% Used)"
         device["storage"] = []
         for drive in dev.get("storage", []):
@@ -87,7 +87,6 @@ def create_lab_report(data: dict):
         devices.append(device)
 
     for dev in devices:
-        # Device Host Header Row
         pdf.set_font("Helvetica", "B", 11)
         pdf.set_fill_color(*dev['color'])
         pdf.set_text_color(255, 255, 255)
@@ -97,9 +96,8 @@ def create_lab_report(data: dict):
         pdf.set_text_color(0, 0, 0)
         pdf.cell(150, 7, f" Hostname: {dev['host']}    |    Location: {dev['bench']}", fill=True, ln=True)
         
-        # Details Block
         pdf.set_font("Helvetica", "", 10)
-        pdf.set_x(15) # Indent system details slightly
+        pdf.set_x(15)
         
         details = (
             f"-> Network Setup : IP: {dev['ip']}   |   MAC: {dev['mac']}\n"
@@ -111,38 +109,5 @@ def create_lab_report(data: dict):
         )
         pdf.multi_cell(0, 6, details, border='L')
         pdf.ln(6)
-
-    # Save output locally
-    from config import REPORT_DIR
-    report_path = REPORT_DIR / "FOCIT_Lab_Report.pdf"
-    pdf.output(str(report_path))
-    print(f"[+] Professional PDF generated successfully as '{report_path}'!")
-
-if __name__ == "__main__":
-    # Default test data for running this module directly
-    sample_data = {
-        "status": [5, 2],
-        "critical": 1,
-        "security": 0,
-        "devices": [
-            {
-                "status": "HEALTHY",
-                "agent_id": "TEST-PC-01",
-                "bench": "Bench A",
-                "ip_on_lan": "192.168.1.10",
-                "mac_address": "AA:BB:CC:DD:EE:FF",
-                "cpu_name": "Intel i5",
-                "cores_physical": 4,
-                "logical": 8,
-                "ram_total_gb": 16,
-                "ram_used_percent": 45,
-                "storage": [{"total_gb": 500, "free_gb": 250, "used_percent": 50}],
-                "platform": "Windows",
-                "release": "10",
-                "version": "19045",
-                "uptime": 86400,
-                "note": ["All systems operational"]
-            }
-        ]
-    }
-    create_lab_report(sample_data)
+    pdf.output(os.path.join(f"{config["BACKUP"]["default_venv_destination"]}", "Lab Report.pdf"))
+    print("[+] Professional PDF generated successfully as 'Lab_Report.pdf'!")
