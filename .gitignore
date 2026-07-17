@@ -227,8 +227,11 @@ reports/
 logs/
 lab_manager_backups/
 lab_manager.db
-main.spec
+LabManager.spec
 lab_icon.ico
+installer_output/
+%Temp/
+labmanager.iss
 # Target any __pycache__ folder at any depth level
 **/__pycache__/
 __pycache__/
