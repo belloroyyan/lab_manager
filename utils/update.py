@@ -4,15 +4,11 @@ import requests
 from pathlib import Path
 from packaging import version
 from colorama import Fore, Style, init
-
-from config import APP_VERSION, GITHUB_REPO
+from config import APP_VERSION, GITHUB_REPO, TEMP_DIR, BINARY_NAME
 from utils.logger import log_manager
 
 logger = log_manager.get_logger("Updater")
 init(autoreset=True)
-TEMP_DIR = Path("update_temp")
-BINARY_NAME = "main.exe"
-
 
 def get_latest_release() -> dict | None:
     try:
@@ -39,20 +35,20 @@ def find_asset(release_data: dict, asset_name: str = "main.exe") -> str | None:
 def download_file(url: str, save_path: Path) -> bool:
     try:
         logger.info(f"Downloading update from: {url}")
-        response = requests.get(url, stream=True, timeout=30)
+        response = requests.get(url, stream=True, timeout=150)
         response.raise_for_status()
-
         save_path.parent.mkdir(parents=True, exist_ok=True)
-
         with open(save_path, "wb") as f:
             for chunk in response.iter_content(chunk_size=8192):
                 if chunk:
                     f.write(chunk)
-
-        logger.info(f"Download complete → {save_path}")
+        logger.info(f"Download complete -> {save_path}")
         return True
     except Exception as e:
         logger.error(f"Download failed: {e}")
+        return False
+    except requests.exceptions.Timeout:
+        logger.error("Download timed out.")
         return False
 
 
@@ -108,7 +104,7 @@ def check_and_update(auto_download: bool = True):
     print("="*60)
 
     if not auto_download:
-        print("→ Please download the update manually from GitHub Releases.")
+        print("[-] Please download the update manually from GitHub Releases.")
         return
     choice = input("\nDownload and install this update now? (y/n): ").strip().lower()
     if choice != "y":

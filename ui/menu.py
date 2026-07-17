@@ -29,7 +29,7 @@ def display_dashboard():
     os.system('cls' if os.name == 'nt' else 'clear')
 
     print("======================================================================")
-    print("                  UNIOSUN LAB MANAGER MAIN MENU                       ")
+    print(f"                  {config['GENERAL']['school_name']} LAB MANAGER MAIN MENU                       ")
     print("======================================================================")
     print("\n  [1] Configure New PC / Install Software")
     print("  [2] Storage Operations")

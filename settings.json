@@ -1,6 +1,7 @@
 {
     "GENERAL": {
         "first_run": false,
+        "school_name": "UNIOSUN",
         "lab_name": "UNIOSUN FOCIT Lab"
     },
     "NETWORK": {
@@ -14,6 +15,7 @@
         "secret": "3080"
     },
     "BACKUP": {
+        "skip": "False",
         "default_destination": "lab_manager_backups",
         "extensions": {
             "Images": [

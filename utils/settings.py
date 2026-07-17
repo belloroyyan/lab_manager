@@ -15,6 +15,7 @@ home = Path(os.path.expanduser("~"))
 DEFAULT_SETTINGS = {
     "GENERAL" : {
         "first_run" : True,
+        "school_name" : "UNIOSUN",
         "lab_name" : "UNIOSUN FOCIT Lab"
     },
     "NETWORK": {

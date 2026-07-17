@@ -7,7 +7,7 @@ if not DESKTOP_DIR.exists():
 from ui.menu import display_menu
 from utils.logger import log_manager
 from utils.update import check_and_update
-
+from utils.execute import clear_shell_wi
 
 os.system("title Lab Manager Session")
 PROJECT_ROOT = Path(__file__).parent
@@ -18,6 +18,7 @@ def main():
         log_manager.setup_logging()
         logger = log_manager.get_logger("Main")
         logger.info(f"Session launched at {time.ctime()}")
+        clear_shell_wi()
         check_and_update(auto_download=False)
         display_menu()
     except (KeyboardInterrupt, EOFError):
