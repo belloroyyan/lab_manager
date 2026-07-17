@@ -8,7 +8,9 @@ from utils import settings
 from utils.logger import log_manager
 from pathlib import Path
 from colorama import Fore, Style, init
+from core.cleanup import CleanupManager
 
+c = CleanupManager()
 init(autoreset=True)
 logger = log_manager.get_logger("BackupManager")
 
@@ -21,6 +23,7 @@ class BackupManager:
         backup_settings = config.get("BACKUP", {})
         dest_raw = backup_settings.get("default_destination", "lab_manager_backups")
         self.default_dest = self.base_dir / dest_raw if not Path(dest_raw).is_absolute() else Path(dest_raw)
+        self.skip_specified = backup_settings.get("skip", True)
         self.forbidden_extensions = backup_settings.get("forbidden_extensions")
         self.ignored_folders = backup_settings.get("ignored_folders")
 
@@ -34,7 +37,8 @@ class BackupManager:
         start_time = time.time()
         for source in source_paths:
             source_path = Path(source)
-            print(f"Processing {source_path}")
+            source_size = c.get_folder_size(source_path)
+            print(f"Processing {source_path} -> {round(source_size / (1024 * 1024), 1)}MB")
             if not source_path.exists():
                 print(f"-> {Fore.RED}{source_path} does not exist.{Style.RESET_ALL}")
                 continue
@@ -45,14 +49,14 @@ class BackupManager:
             backup_manifest["skipped"] = []
             backup_manifest["empty"] = []
             for file in source_path.rglob("*"):
-                if (file.is_dir() or file.is_file()) and file.stat().st_size == 0:
+                if (file.is_dir() or file.is_file()) and not file.stat().st_size:
                     backup_manifest["empty"].append(f"{file}")
                     continue
-                if any(part in self.ignored_folders for part in file.parts):
+                if any(part in self.ignored_folders for part in file.parts) and self.skip_specified:
                     backup_manifest["skipped"].append(f"{file}")
                     continue
                 if file.is_file():
-                    if file.suffix.lower() in self.forbidden_extensions:
+                    if file.suffix.lower() in self.forbidden_extensions and self.skip_specified:
                         backup_manifest["skipped"].append(f"{file}")
                         continue
                     rel_path = file.relative_to(source_path)

@@ -22,11 +22,6 @@ def init_db():
                     last_seen DATETIME DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS settings (
-                    def_port INTEGER
-                )
-            ''')
     except sqlite3.OperationalError as e:
         print("Failed to initiate database.")
         logger.error(f"Error creating table: {e}")
@@ -73,5 +68,4 @@ def get_all_saved_devices():
 
 print(f"\n    {magenta}Inititating database...")
 init_db()
-print(f"    {db_path}")
 time.sleep(.5)

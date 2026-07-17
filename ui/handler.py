@@ -12,8 +12,9 @@ from utils.logger import log_manager
 from utils.help import display_help
 from utils.settings import (init_settings, display_all_settings, load_settings, edit_numeric_setting, edit_boolean_setting, edit_list_setting, edit_string_setting, save_settings, get_min_max)
 from utils.shell import open_shell_access, kill_port
-from utils.listener import start_listener
-from config import (CYAN, BOLD, GREEN, YELLOW, GRAY, RED, PROJECT_ROOT, REPORT_DIR)
+from utils.listener import start_listener, initiate_listener
+from utils.update import check_and_update
+from config import (CYAN, BOLD, GREEN, YELLOW, GRAY, RED, DESKTOP_DIR, REPORT_DIR)
 from colorama import Fore, Back, Style, init
 
 init(autoreset=True)
@@ -110,7 +111,7 @@ def handle_backup():
     choice = input(f"{GREEN}Input source path(s) for backup: {RESET}").strip()
     password = input(f"\n{YELLOW}Input password (leave blank if none): {RESET}")
     source_paths = choice.split(" ") if choice else config["BACKUP"]["default_sources"]
-    backup_manager = BackupManager(PROJECT_ROOT, password)
+    backup_manager = BackupManager(DESKTOP_DIR, password)
     backup_manager.run_backup(source_paths)
     clear_shell()
 
@@ -192,7 +193,8 @@ def handle_network():
         for dev in devices:
             print(dev)
     elif choice == '5':
-        start_listener(8088)
+        initiate_listener(port=8088)
+        start_listener(port=8088)
     elif choice == "0":
         return
     else : print("Invalid choice.")
@@ -234,11 +236,20 @@ def handle_io():
             parsed_data = parse_node_block(data)
             for i, device in parsed_data.items():
                 print_clean_report(device)
+        else:
+            print("Report file does not exist. Run a scan first.")
     elif choice == "5":
         kill_port(8088)
     elif choice == "0":
         return
     else: print("Invalid choice.")
+    clear_shell()
+
+def handle_update():
+    print("Checking for recent updates...")
+    c = check_and_update()
+    if not c:
+        print(f"{Fore.YELLOW}Could not get latest release. Check your connectivity.{Style.RESET_ALL}")
     clear_shell()
 
 def handle_cleanup():
@@ -322,3 +333,4 @@ def handle_settings():
         
 def handle_help():
     display_help()
+    clear_shell()

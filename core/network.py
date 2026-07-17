@@ -1,10 +1,9 @@
 import subprocess
 import platform
 from concurrent.futures import ThreadPoolExecutor
-import os, socket
+import socket
 from colorama import Fore, Style
 from utils.logger import log_manager
-from utils.execute import clear_shell
 from utils.database import save_device, get_device
 from utils.settings import load_settings, save_settings
 

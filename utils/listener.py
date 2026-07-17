@@ -2,14 +2,13 @@ import socket
 from tkinter import Tk, messagebox
 import subprocess
 import platform
-import shutil
+import ctypes
 import os
 import json
 import psutil
 import time
 import uuid
 from datetime import datetime
-from pathlib import Path
 from core.network import NetworkHandler
 from config import REPORT_DIR, LOG_DIR
 from utils.logger import log_manager
@@ -135,4 +134,56 @@ def start_listener(port=8088):
         root.attributes('-topmost', True)
         messagebox.showinfo("LAB MANAGER MESSAGE", f"From: {addr}\n\nMessage: {msg}", parent=root)
         root.destroy()
-#start_listener(8088)
+
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin() != 0
+    except Exception:
+        return False
+
+def firewall_rule_exists(rule_name: str):
+    result = subprocess.run(
+        ["netsh", "advfirewall", "firewall", "show", "rule", f"name={rule_name}"],
+        capture_output=True,
+        text=True
+    )
+    return rule_name.lower() in result.stdout.lower() and result.returncode == 0
+
+
+def initiate_listener(port: int = 8088):
+    rule_name = "LabManager Listener"
+
+    if firewall_rule_exists(rule_name):
+        logger.info(f"Firewall rule '{rule_name}' already exists.")
+        print(f"[+] Firewall rule already exists for UDP port {port}")
+        return True
+
+    if not is_admin():
+        logger.warning("Firewall rule missing and no admin privileges.")
+        print("[!] Firewall rule does not exist.")
+        print("[!] Please run Lab Manager as Administrator once to create the rule.")
+        return False
+
+    result = subprocess.run(
+        [
+            "netsh", "advfirewall", "firewall", "add", "rule",
+            f"name={rule_name}",
+            "dir=in",
+            "action=allow",
+            "protocol=UDP",
+            f"localport={port}",
+            "enable=yes",
+            "profile=any"
+        ],
+        capture_output=True,
+        text=True
+    )
+
+    if result.returncode == 0:
+        logger.info(f"Firewall rule '{rule_name}' created successfully.")
+        print(f"[+] Firewall rule created for UDP port {port}")
+        return True
+    else:
+        logger.error(f"Failed to create firewall rule: {result.stderr}")
+        print(f"[!] Failed to create firewall rule:\n{result.stderr}")
+        return False

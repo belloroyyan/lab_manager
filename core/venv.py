@@ -6,7 +6,7 @@ from utils.check import find_system_python
 from utils.logger import log_manager
 from utils.execute import (execute_task, clear_shell)
 from utils.settings import load_settings
-from config import (VENV_DIR, PROJECT_ROOT)
+from config import VENV_DIR
 from colorama import init, Fore, Style
 from pathlib import Path
 
@@ -143,4 +143,4 @@ class VenvHandler():
             execute_task(install_cmd, "Package Installation")
         else:
             print("ERROR: Venv not found")
-            print(f"{venv_to_install_to} not found in {PROJECT_ROOT}")
+            print(f"{venv_to_install_to} not found in {VENV_DIR}")

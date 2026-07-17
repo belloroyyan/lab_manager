@@ -1,4 +1,4 @@
-from ui.handler import (handle_plem, handle_sort, handle_backup, handle_git, handle_log, handle_venv, handle_network, handle_help, handle_settings, handle_syscheck, handle_io, handle_cleanup)
+from ui.handler import (handle_plem, handle_sort, handle_backup, handle_git, handle_log, handle_update, handle_venv, handle_network, handle_help, handle_settings, handle_syscheck, handle_io, handle_cleanup)
 from utils.execute import clear_shell_wi
 from utils.logger import log_manager
 from utils.settings import load_settings, save_settings, init_settings
@@ -42,6 +42,7 @@ def display_dashboard():
     print("  [9] I/O")
     print("\n  [L] Logs")
     print("  [S] Settings")
+    print("  [U] Check For Updates")
     print("  [H] Read Help Manual")
     print("\n  [0] Exit Application")
     print("----------------------------------------------------------------------")
@@ -59,9 +60,9 @@ def display_menu():
             logger.info("First-run flag cleared for future sessions.")
             time.sleep(1.5)
         else: 
-            typewriter(f"     Welcome back! Booting Lab Manager main menu...")
+            typewriter(f"     Welcome back! Booting Lab Manager main menu...", speed=0.001)
             time.sleep(.5)
-    except: logger.error("Could not retrieve 'FIRST_RUN' info.")
+    except Exception as e: logger.error(f"Could not retrieve 'FIRST_RUN' info. {e}")
 
     while True:
         display_dashboard()
@@ -112,6 +113,10 @@ def display_menu():
             time.sleep(1)
             clear_shell_wi()
             handle_settings()
+        elif choice == "u" or choice == 'update':
+            time.sleep(1)
+            clear_shell_wi()
+            handle_update()
         elif choice == "h" or choice == 'help':
             time.sleep(1)
             clear_shell_wi()

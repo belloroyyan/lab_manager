@@ -1,12 +1,23 @@
 import subprocess
 import os
 import shutil
+import time
 from utils.logger import log_manager
 from config import (GREEN, RED, RESET, GIT_DIR)
-from colorama import Fore, Style
+from colorama import Fore, Style, init
 
 logger = log_manager.get_logger("GitHandler")
+init(autoreset=True)
+magenta = Fore.MAGENTA
 reset = Style.RESET_ALL
+
+print(f"\n    {magenta}Checking for `git_repos` folder...")
+if not os.path.exists(GIT_DIR):
+    os.mkdir(GIT_DIR)
+    logger.info("Created `git_repos` folder.")
+time.sleep(.5)
+print(f"\n    {magenta}Found `git_repos` folder within base directory.{reset}")
+print(f"    {GIT_DIR}")
 
 class GitHandler:
     def __init__(self):

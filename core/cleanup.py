@@ -38,13 +38,10 @@ class CleanupManager:
             if folder.is_dir() and folder.name not in self.ignored_folders:
                 size = self.get_folder_size(folder)
                 folder_sizes.append((folder, size))
-
         folder_sizes.sort(key=lambda x: x[1], reverse=True)
-
         if not folder_sizes:
             print("No folders found.")
             return
-
         max_size = folder_sizes[0][1]
         print(f"{'Folder':<75} {'Size (MB)':<20} {'Bar':<45} {'%'}")
         print("-" * 140)

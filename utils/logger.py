@@ -49,29 +49,52 @@ class LogHandler():
         print(f"{GRAY}------------------------------------------------------------{RESET}")
 
     def log_summary(self):
-        lines = LOG_FILE.read_text().splitlines()
-        lines_len = len(lines) - 3
-        print(f"  {CYAN}Total{RESET}: {lines_len} entries.")
+        if not LOG_FILE.exists():
+            print(f"{RED}No log file found.{RESET}")
+            return
+
+        lines = [line for line in LOG_FILE.read_text().splitlines() if line.strip()]
+
         summary = {
-            "errors" : 0,
-            "critical" : 0,
-            "warning" : 0,
-            "success" : 0,
-            "info" : 0
+            "critical": 0,
+            "errors": 0,
+            "warning": 0,
+            "success": 0,
+            "info": 0,
         }
+        labels = {
+            "critical": "Critical",
+            "errors": "Error",
+            "warning": "Warning",
+            "success": "Successful",
+            "info": "Info",
+        }
+        colors = {
+            "critical": RED,
+            "errors": RED,
+            "warning": YELLOW,
+            "success": GREEN,
+            "info": GRAY,
+        }
+
         for line in lines:
-            if "ERROR" in line:
-                summary["errors"] += 1
-            elif "CRITICAL" in line:
+            if "CRITICAL" in line:
                 summary["critical"] += 1
+            elif "ERROR" in line:
+                summary["errors"] += 1
             elif "WARNING" in line:
                 summary["warning"] += 1
             elif "SUCCESS" in line or "Task Started" in line:
                 summary["success"] += 1
+            elif "---" in line:
+                continue
             else:
                 summary["info"] += 1
-        for i, j in summary.items():
-            print(f"    {i.capitalize() if i != "success" else f"{i.capitalize()}ful"} entries: {j}")
+
+        total = len(lines) - 1
+        print(f"  {CYAN}Total{RESET}: {total} entries.")
+        for key, count in summary.items():
+            print(f"    {colors[key]}{labels[key]} entries{RESET}: {count}")
 
     def clear_system_logs(self):
         print(f"\n{YELLOW}{BOLD} WARNING: This will permanently delete all activity history.{RESET}")
