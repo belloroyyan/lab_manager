@@ -7,7 +7,11 @@
         "default_port": 5050,
         "max_port_attempts": 5,
         "auto_scan_on_startup": true,
-        "ping_timeout": "500"
+        "ping_timeout": 500
+    },
+    "LISTENER": {
+        "port": 8088,
+        "secret": "3080"
     },
     "BACKUP": {
         "default_destination": "lab_manager_backups",

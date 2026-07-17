@@ -92,6 +92,10 @@ def display_menu():
             time.sleep(1)
             clear_shell_wi()
             handle_network()
+        elif choice == "7":
+            time.sleep(1)
+            clear_shell_wi()
+            handle_syscheck()
         elif choice == "8":
             time.sleep(1)
             clear_shell_wi()

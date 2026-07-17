@@ -33,7 +33,7 @@ class NetworkHandler():
                 for line in output.splitlines():
                     if "<00>" in line and "GROUP" not in line:
                         return line.split()[0].strip()
-            except:
+            except (subprocess.CalledProcessError, FileNotFoundError, OSError):
                 return "Unknown Device"
         return "Unknown Device"
 
