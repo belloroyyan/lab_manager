@@ -5,9 +5,9 @@ logger = log_manager.get_logger("ExecuteWrapper")
 
 def execute_task(command, task_name):
     print(f"\n>>> Starting Task: {task_name}")
-    logger.info(f"Executing: {' '.join(command)}")
+    logger.info(f"Executing: {' '.join(command) if isinstance(command, list) else command}")
     try:
-        process = subprocess.Popen( command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True )
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
         for line in process.stdout:
             print(f"  [STDOUT]: {line.strip()}")
         process.wait()
@@ -15,9 +15,10 @@ def execute_task(command, task_name):
             logger.info(f"Task '{task_name}' completed successfully.")
             return True
         else:
-            error_output = process.stderr.read()
+            error_output = process.stderr.read() if process.stderr else ""
             logger.error(f"Task '{task_name}' failed with code {process.returncode}")
-            logger.error(f"Error Message: {error_output}")
+            if error_output:
+                logger.error(f"Error Message: {error_output}")
             print(f"\033[91mError in {task_name}! Check the log for details.\033[0m")
             return False
     except Exception as e:

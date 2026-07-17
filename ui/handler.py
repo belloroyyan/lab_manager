@@ -12,11 +12,9 @@ from utils.logger import log_manager
 from utils.help import display_help
 from utils.settings import (init_settings, display_all_settings, load_settings, edit_numeric_setting, edit_boolean_setting, edit_list_setting, edit_string_setting, save_settings, get_min_max)
 from utils.shell import open_shell_access, kill_port
-from utils.report import create_lab_report
 from utils.listener import start_listener
 from config import (CYAN, BOLD, GREEN, YELLOW, GRAY, RED, PROJECT_ROOT, REPORT_DIR)
 from colorama import Fore, Back, Style, init
-from datetime import timedelta
 
 init(autoreset=True)
 logger = log_manager.get_logger("Handler")
@@ -219,8 +217,6 @@ def handle_io():
   [1] Open Shell Access
   [2] Run Inventory Check
   [3] Run Inventory Check Across LAN
-  [4] Print Last Inventory Scan
-  [5] Generate PDF For Last Scan
   [0] Back to Main Menu""")
     print("----------------------------------------------------------------------\n")
     choice = input(f"{GREEN}Select what i/o operation you wish to perform: {RESET}").strip()
@@ -239,32 +235,6 @@ def handle_io():
             for i, device in parsed_data.items():
                 print_clean_report(device)
     elif choice == "5":
-        report_dir = REPORT_DIR / "inventory.tmp"
-        if report_dir.exists() and report_dir.stat().st_size > 0:
-            with open(report_dir, "r", encoding="utf-8") as f:
-                data = f.read()
-            clean_data = parse_node_block(data)
-            data = {}
-            data["devices"] = []
-            data["status"] = ["Unknown", len(clean_data.values())]
-            data["critical"] = 0
-            data["security"] = 0
-            for i, device in clean_data.items():
-                issues = print_clean_report(device)
-                if not issues.values():
-                    print(f"\n  No issues detected for {device["agent_id"]}")
-                    device["status"] = "HEALTHY"
-                else:
-                    print(f"\n  [{Fore.RED}Critical issues{Style.RESET_ALL} = {issues["critical"]} |{YELLOW} Warnings {RESET}= {issues["warning"]}]")
-                    device["note"] = issues["note"]
-                    device["uptime"] = str(timedelta(seconds=int(device.get("uptime_seconds"))))
-                    device["status"] = "CRITICAL" if issues["critical"] else "WARNING"
-                    data["critical"] += issues["critical"]
-                    data["security"] += issues["warning"]
-                data["devices"].append(device)
-            print("\n")
-            create_lab_report(data=data)
-    elif choice == "00":
         kill_port(8088)
     elif choice == "0":
         return

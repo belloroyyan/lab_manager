@@ -59,8 +59,9 @@ def get_device(ip):
     except sqlite3.OperationalError as e:
         print("Failed to retrieve data.")
         logger.error(f"Error retrieving port: {e}")
-    conn.commit()
-    conn.close()
+        return None
+    finally:
+        conn.close()
 
 def get_all_saved_devices():
     conn = sqlite3.connect(db_path)

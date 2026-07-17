@@ -251,21 +251,48 @@ From the main dashboard, pick a number/letter to enter that feature's sub-menu �
 
 ## Known Issues
 
-A few things worth being aware of when running or maintaining this code:
+The following issues remain and should be addressed in future iterations:
 
-- **`main.py`** uses `except KeyboardInterrupt, EOFError:` — this is Python 2 syntax and will raise a `SyntaxError` under Python 3. It needs to be a tuple: `except (KeyboardInterrupt, EOFError):`.
-- **`menu.py`** advertises menu option `[7] System Checks and Health` but the input loop's `if/elif` chain has no branch for `choice == "7"`, so it currently falls through to "Invalid option."
-- Two versions of **`network.py`** and **`database.py`**-adjacent imports exist across the uploads (a flat module version and a class-based `core/network.py` version); make sure the final package layout consistently imports from `core/` vs `utils/` as referenced (e.g. `core/inventory.py` imports `from core.network import NetworkHandler`, while `utils/network.py`'s standalone version duplicates similar logic — likely legacy/superseded).
-- `settings.py`'s `get_min_max()` only defines bounds for `default_port`; any other integer setting edited via the numeric editor will hit `None, None` bounds and fail comparisons.
-- `report.py`'s `create_lab_report()` requires a `data` argument, but its `if __name__ == "__main__":` block calls it with none — running the file directly will raise a `TypeError`.
-- `pdf.output("Lab Report.pdf")` in `report.py` doesn't use `REPORT_DIR`, so the PDF is written to the current working directory rather than the reports folder.
+- Two versions of **`network.py`** exist (a flat module version in `utils/` and a class-based version in `core/`); consider consolidating to avoid confusion and potential import conflicts. Currently, `core/inventory.py` imports from `core.network`, which is the canonical implementation.
+- **Type hints** are not implemented across the codebase, limiting IDE support and static type checking capabilities.
+- **Unit tests and integration tests** are not yet available. Consider adding comprehensive test coverage for core business logic.
+- **Shell injection risk**: `execute.py` uses `shell=True` with command construction; consider using `shlex.quote()` for user input or refactoring to avoid shell=True.
+- **Listener authentication**: The listener agent currently accepts unauthenticated remote commands. See Security Notes below.
+
+### Recent Fixes (v1.1)
+- ✅ Fixed Python 2 exception syntax in `main.py`
+- ✅ Fixed menu option [7] routing in `menu.py`
+- ✅ Fixed SQL PRIMARY KEY syntax in `database.py`
+- ✅ Fixed database connection management with proper cleanup
+- ✅ Fixed ping timeout logic in `network.py`
+- ✅ Extended `get_min_max()` bounds validation in `settings.py`
+- ✅ Fixed PDF output location to use `REPORT_DIR` in `report.py`
+- ✅ Fixed main block execution in `report.py`
 
 ## Security Notes
 
-This tool is designed for legitimate lab administration, but a few of its capabilities are inherently sensitive and worth deliberate handling if you deploy it:
+This tool is designed for legitimate lab administration. The following security considerations should be understood:
 
-- The **listener agent** accepts unauthenticated UDP commands (`SHUTDOWN`, `RESTART`, `LOGOUT`, `KILL`) from anyone on the network who knows the port — there's a `secret` field reserved in `settings.json` under `LISTENER`, but it isn't currently checked against incoming messages. This will be updated in later changes.
-- **`shell.py`** exposes an elevated interactive shell and process-killing by name — restrict access to the admin console itself.
-- Telemetry gathered (serial numbers, MAC addresses, logged-in usernames) should be handled per your institution's data-handling policy.
+### Current Security Status
+
+- **Listener Agent (UDP Messages)**: The listener accepts remote commands (`SHUTDOWN`, `RESTART`, `LOGOUT`, `KILL`) from any source that knows the port. The `secret` field in `settings.json` under `LISTENER` is currently reserved but **not yet validated** against incoming messages. 
+  - **Mitigation**: Currently, restrict listener deployment to trusted internal networks only.
+  - **Future**: HMAC-SHA256 authentication should be implemented (see TODO in `utils/listener.py`).
+
+- **Telemetry Data**: Gathered telemetry includes sensitive information (serial numbers, MAC addresses, logged-in usernames). Handle per your institution's data-handling policy and consider encrypting responses in transit.
+
+- **Elevated Shell Access**: `shell.py` provides elevated `cmd.exe` access. Restrict access to the admin console to trusted administrators only.
+
+- **Shell Injection Risk**: `execute.py` uses `shell=True` with command construction. User input should be validated and escaped (see TODO in `utils/execute.py`).
+
+### Deployment Recommendations
+
+1. Deploy the listener agent only on **trusted internal networks** behind institutional firewalls.
+2. Restrict admin console access to authorized IT staff.
+3. Audit logs regularly (`logs/lab.log`) for suspicious activity.
+4. Before production deployment, implement the security enhancements marked as TODO in the codebase:
+   - Add HMAC-SHA256 validation for remote commands
+   - Encrypt telemetry responses
+   - Sanitize command-line inputs with `shlex.quote()`
 
 This README.md file was generated by `claude.ai`.

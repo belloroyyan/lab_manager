@@ -21,7 +21,7 @@ DEFAULT_SETTINGS = {
         "default_port": 5050,
         "max_port_attempts": 5,
         "auto_scan_on_startup": True,
-        "ping_timeout" : "500"
+        "ping_timeout" : 500
     },
     "LISTENER" : {
         "port" : 8088,
@@ -191,10 +191,12 @@ def edit_list_setting(section, key):
             print("Invalid list number selection.")
 
 def get_min_max(key):
-    if key == "default_port":
-        return (1024, 65535)
-    if key == "max_port_atttempts":
-        return (5, 25)
+    bounds = {
+        "default_port": (1024, 65535),
+        "max_port_attempts": (5, 25),
+        "ping_timeout": (100, 5000),
+    }
+    return bounds.get(key, (None, None))
     
 def save_settings(settings_dict):
     with open(SETTINGS, "w") as s:

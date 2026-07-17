@@ -131,7 +131,7 @@ def print_clean_report(data: dict):
           f"({ram_color}{ram_pct}% used{reset})")
     if ram_color == red:
         issues["critical"] += 1
-        issues["note"].append(f"Action Required: Clear storage space on Host: {hostname}")
+        issues["note"].append(f"[!] Action Required: Clear storage space on Host: {hostname}")
     elif ram_color == yellow:
         issues["warning"] += 1
     print(f"\n  {cyan}Storage ({Style.BRIGHT}Type --> {drive_type}):{reset}")
@@ -143,7 +143,7 @@ def print_clean_report(data: dict):
               f"({disk_color}{use}% used{reset})")
         if disk_color == red:
             issues["critical"] += 1
-            issues["note"].append(f"Action Required: Free virtual memory of disk on Host: {hostname}")
+            issues["note"].append(f"[!] Action Required: Free virtual memory of disk on Host: {hostname}")
         elif disk_color == yellow:
             issues["warning"] += 1
     uptime = str(timedelta(seconds=int(uptime_sec)))
