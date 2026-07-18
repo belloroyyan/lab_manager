@@ -1,29 +1,44 @@
 # Lab Manager
 
-A Windows console application for administering a shared/networked computer lab (default label: **"UNIOSUN FOCIT Lab"**). It centralizes the tasks an IT admin normally does by hand — setting up new PCs, scanning the LAN, pushing messages/commands to lab machines, backing up data, managing Python virtual environments, cleaning disk space, and generating inventory/health reports — behind a single menu-driven CLI.
+Lab Manager is a Windows-first, menu-driven administration console for managing a fleet of lab computers. It centralizes common IT tasks — provisioning, network scanning, backups, virtualenv management, system checks, cleanup, and reporting — into a single interactive CLI and an optional lightweight UDP "listener" agent that runs on managed endpoints.
 
-The project has two operating "roles" that run the same codebase:
+Two roles are supported from the same codebase:
 
-- **Console / Admin instance** — the interactive menu (`main.py`) an administrator runs to manage the lab.
-- **Agent instance** — `listener.py`, run on individual lab PCs, which listens for commands broadcast from the admin console and reports back system telemetry.
+- **Admin Console** — run `main.py` on an administrative workstation to operate the dashboard and orchestrate actions across the lab.
+- **Agent (Listener)** — `utils/listener.py` runs on managed workstations and responds to inventory and control requests from the admin console.
 
 ---
 
 ## Table of Contents
 
-- [Architecture](#architecture)
-- [Feature Overview](#feature-overview)
-- [Module Reference](#module-reference)
-  - [Entry Point](#entry-point)
-  - [`ui/` — Menu & Input Handling](#ui--menu--input-handling)
-  - [`core/` — Feature Engines](#core--feature-engines)
-  - [`utils/` — Shared Services](#utils--shared-services)
-- [Configuration](#configuration)
-- [Data Storage](#data-storage)
-- [Setup](#setup)
-- [Usage](#usage)
-- [Known Issues](#known-issues)
-- [Security Notes](#security-notes)
+- [Lab Manager](#lab-manager)
+  - [Table of Contents](#table-of-contents)
+  - [Highlights](#highlights)
+  - [Architecture](#architecture)
+  - [Features](#features)
+  - [Quick Start](#quick-start)
+  - [Configuration](#configuration)
+  - [Security](#security)
+  - [Development Notes](#development-notes)
+  - [Contributing](#contributing)
+  - [Changelog](#changelog)
+  - [License \& Acknowledgements](#license--acknowledgements)
+  - [Usage](#usage)
+  - [Known Issues](#known-issues)
+    - [Recent Fixes (v2.1.1)](#recent-fixes-v211)
+  - [Security Notes](#security-notes)
+    - [Current Security Status](#current-security-status)
+    - [Deployment Recommendations](#deployment-recommendations)
+
+---
+
+## Highlights
+
+- Modular design separating UI, core business logic, and utilities.
+- Inventory and telemetry collection with PDF reporting.
+- Backup engine with optional AES encryption (pyzipper).
+- Virtualenv management and bulk package operations.
+- Concurrent LAN scanning and device persistence (SQLite).
 
 ---
 
@@ -32,32 +47,146 @@ The project has two operating "roles" that run the same codebase:
 ```
 lab_manager/
 ├── core/                   # Feature engines (business logic)
-│   ├── backup.py           # Encrypted, filtered backup/archival engine
-│   ├── cleanup.py          # Disk usage analysis & cleanup engine
+│   ├── backup.py           # Backup/archival engine (pyzipper support)
+│   ├── cleanup.py          # Disk usage analysis & cleanup utilities
 │   ├── file_sorter.py      # File/media sorting engine
-│   ├── git.py              # Git clone / Git Bash automation
-│   ├── inventory.py        # Software + LAN hardware inventory & reporting
-│   ├── network.py          # LAN scanning & UDP messaging engine
-│   └── venv.py             # Virtual environment lifecycle manager
+│   ├── git.py              # Git clone and helper utilities
+│   ├── inventory.py        # Inventory and LAN reporting flows
+│   ├── network.py          # Scanning, hostname resolution, port probing
+│   └── venv.py             # Virtual environment lifecycle
 │
-├── ui/
-│   ├── menu.py              # Main dashboard loop
-│   └── handler.py           # Routes menu choices to core/utils logic
+├── ui/                     # Interactive menu + routing
+│   ├── menu.py             # Main dashboard loop
+│   └── handler.py          # Submenu handlers that call core/utils
 │
-├── utils/                   # Shared low-level services
-│   ├── check.py             # Environment/tool availability checks
-│   ├── database.py          # SQLite device registry
-│   ├── drive_manager.py     # Physical drive enumeration
-│   ├── execute.py           # Subprocess execution wrapper
-│   ├── report.py            # PDF report generator (fpdf)
-│   ├── help.py              # In-app help/manual viewer
-│   ├── listener.py          # UDP agent — runs on lab PCs
-│   ├── logger.py            # Central logging + log analysis
-│   ├── progress_bar.py      # CLI progress bar
-│   ├── settings.py          # settings.json load/save/edit
-│   └── shell.py             # Elevated shell + process/port killer
+├── utils/                  # Shared low-level services
+│   ├── database.py         # SQLite device registry (lab_manager.db)
+│   ├── execute.py          # Subprocess execution wrapper
+│   ├── listener.py         # UDP listener agent (runs on endpoints)
+│   ├── logger.py           # Central logging utilities
+│   ├── report.py           # PDF generator (fpdf)
+│   └── settings.py         # settings.json load/save and editors
 │
-├── config.py                 # Paths, colors, admin/firewall helpers
+├── config.py               # Project path constants and helpers
+├── main.py                 # Application bootstrapper (admin console)
+├── settings.json           # Runtime settings (generated on first run)
+└── lab_manager.db          # SQLite registry (created at runtime)
+```
+
+---
+
+## Features
+
+- Network scanning (ping sweep, hostname resolution) and device discovery
+- UDP-based listener/agent for remote telemetry and basic control
+- Backup archiving with excluded folders and forbidden extensions
+- Virtual environment creation, package installation, and bulk upgrades
+- Git clone/pull helpers
+- Disk cleanup utilities (temp purge, recycle bin, large file review)
+- PDF inventory report generation (executive summary + per-device details)
+- Interactive settings editor driven from the menu
+
+---
+
+## Quick Start
+
+Prerequisites (Windows): Python 3.8+ and the packages below.
+
+Install dependencies:
+
+```powershell
+pip install colorama psutil requests pyzipper fpdf winshell
+```
+
+Run the admin console:
+
+```powershell
+python main.py
+```
+
+Run the listener agent on a managed workstation (example):
+
+```powershell
+python -c "from utils.listener import start_listener; start_listener(8088)"
+```
+
+Notes:
+- The first run will create `settings.json` from defaults, and the app will create working folders such as `logs/`, `reports/`, and `venvs/` as needed.
+
+---
+
+## Configuration
+
+All runtime settings live in `settings.json` (generated from `utils/settings.DEFAULT_SETTINGS`). Key sections:
+
+- `GENERAL` — first_run flag, lab display name.
+- `NETWORK` — default ports, ping timeout, auto-scan flags.
+- `LISTENER` — agent port and (reserved) shared secret.
+- `BACKUP` — default destination, extensions map, ignored folders.
+- `SOFTWARE_CHECKS` — tools to check for (Python, Git, VS Code) and their version flags.
+
+Use the Settings menu in the console to view and edit configuration values.
+
+---
+
+## Security
+
+Security is important for any remote administration tool. The project includes the following mitigations and open TODOs:
+
+Current status:
+
+- The listener accepts UDP messages for `INFO` and certain control commands. A `secret` value exists in `settings.json` but **must be implemented and validated** by the listener to prevent unauthorized commands.
+- Sensitive telemetry (serial numbers, MACs, usernames) is collected; treat inventory data per your institution's policies.
+- `utils/execute.py` currently uses `shell=True` in some flows. Avoid running with untrusted input and sanitize arguments (use `shlex.quote()` or pass lists to subprocess functions to avoid shell interpretation).
+
+Recommendations before production deployment:
+
+1. Implement message authentication (HMAC-SHA256) in `utils/listener.py` and validate against `settings.json` `LISTENER.secret`.
+2. Encrypt agent telemetry in transit or run the listener behind a secure VPN or trusted LAN.
+3. Restrict admin console access to trusted operators.
+4. Replace any `shell=True` usage with secure subprocess invocation patterns.
+
+The codebase includes TODO markers where these security improvements should be applied.
+
+---
+
+## Development Notes
+
+- The codebase is structured to be modular; unit tests are recommended for `core/` modules (network, backup, inventory) and `utils/` helpers (database, execute)
+- Add type hints to improve maintainability and static analysis
+- Consider consolidating duplicate or legacy modules (there are multiple network helper implementations in earlier versions); prefer `core/network.py` as canonical
+
+---
+
+## Contributing
+
+1. Fork the repository and create a feature branch
+2. Run tests locally (none included yet — please add tests for your changes)
+3. Submit a pull request with a clear description and changelog
+
+Please follow the existing code style and include unit tests for core logic where possible.
+
+---
+
+## Changelog
+
+- v1.1 — Stability & correctness fixes
+  - Fixed Python 2 exception syntax in `main.py`
+  - Fixed menu routing for option 7
+  - Fixed SQL PRIMARY KEY syntax and improved DB connection handling
+  - Fixed ping timeout logic and improved error handling in network utilities
+  - Ensured PDF reports are written to `reports/` and improved direct invocation behavior
+  - Added TODOs and guidance for listener authentication and subprocess hardening
+
+---
+
+## License & Acknowledgements
+
+This project was created as a lab management utility.
+
+---
+
+*Generated by contributor tooling.*
 ├── main.py                   # Application bootstrapper
 ├── settings.json              # Runtime configuration (auto-generated)
 └── lab_manager.db              # SQLite device registry (auto-generated)
@@ -253,21 +382,19 @@ From the main dashboard, pick a number/letter to enter that feature's sub-menu �
 
 The following issues remain and should be addressed in future iterations:
 
-- Two versions of **`network.py`** exist (a flat module version in `utils/` and a class-based version in `core/`); consider consolidating to avoid confusion and potential import conflicts. Currently, `core/inventory.py` imports from `core.network`, which is the canonical implementation.
-- **Type hints** are not implemented across the codebase, limiting IDE support and static type checking capabilities.
-- **Unit tests and integration tests** are not yet available. Consider adding comprehensive test coverage for core business logic.
-- **Shell injection risk**: `execute.py` uses `shell=True` with command construction; consider using `shlex.quote()` for user input or refactoring to avoid shell=True.
+- **Unit tests and integration tests** are not yet available.
+- **Shell injection risk**: `execute.py` uses `shell=True` with command construction.
 - **Listener authentication**: The listener agent currently accepts unauthenticated remote commands. See Security Notes below.
 
-### Recent Fixes (v1.1)
-- ✅ Fixed Python 2 exception syntax in `main.py`
-- ✅ Fixed menu option [7] routing in `menu.py`
-- ✅ Fixed SQL PRIMARY KEY syntax in `database.py`
-- ✅ Fixed database connection management with proper cleanup
-- ✅ Fixed ping timeout logic in `network.py`
-- ✅ Extended `get_min_max()` bounds validation in `settings.py`
-- ✅ Fixed PDF output location to use `REPORT_DIR` in `report.py`
-- ✅ Fixed main block execution in `report.py`
+### Recent Fixes (v2.1.1)
+- Fixed Python 2 exception syntax in `main.py`
+- Fixed menu option [7] routing in `menu.py`
+- Fixed SQL PRIMARY KEY syntax in `database.py`
+- Fixed database connection management with proper cleanup
+- Fixed ping timeout logic in `network.py`
+- Extended `get_min_max()` bounds validation in `settings.py`
+- Fixed PDF output location to use `REPORT_DIR` in `report.py`
+- Fixed main block execution in `report.py`
 
 ## Security Notes
 
@@ -277,7 +404,7 @@ This tool is designed for legitimate lab administration. The following security 
 
 - **Listener Agent (UDP Messages)**: The listener accepts remote commands (`SHUTDOWN`, `RESTART`, `LOGOUT`, `KILL`) from any source that knows the port. The `secret` field in `settings.json` under `LISTENER` is currently reserved but **not yet validated** against incoming messages. 
   - **Mitigation**: Currently, restrict listener deployment to trusted internal networks only.
-  - **Future**: HMAC-SHA256 authentication should be implemented (see TODO in `utils/listener.py`).
+  - **Future**: HMAC-SHA256 authentication will be implemented.
 
 - **Telemetry Data**: Gathered telemetry includes sensitive information (serial numbers, MAC addresses, logged-in usernames). Handle per your institution's data-handling policy and consider encrypting responses in transit.
 
@@ -294,5 +421,3 @@ This tool is designed for legitimate lab administration. The following security 
    - Add HMAC-SHA256 validation for remote commands
    - Encrypt telemetry responses
    - Sanitize command-line inputs with `shlex.quote()`
-
-This README.md file was generated by `claude.ai`.
