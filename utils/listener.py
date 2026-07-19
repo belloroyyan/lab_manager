@@ -9,14 +9,19 @@ import psutil
 import time
 import uuid
 from datetime import datetime
+from cryptography.fernet import Fernet
 from core.network import NetworkHandler
 from config import REPORT_DIR, LOG_DIR
+from utils.settings import load_settings
 from utils.logger import log_manager
 from utils.shell import kill_port
 
+STANDALONE = True
 report_dir = REPORT_DIR / "inventory.tmp"
 logger = log_manager.get_logger("Listener")
 n = NetworkHandler()
+config = load_settings()
+ENABLEREMOTECOMMANDS = False
 
 def get_agent_data():
     current_user = os.path.expanduser("~")
@@ -98,26 +103,30 @@ def start_listener(port=8088):
     while True:
         data, addr = s.recvfrom(2048)
         msg = data.decode('utf-8')
-        if msg == 'SHUTDOWN':
+        if msg.startswith("key"):
+            if not config["LISTENER"]["secret_key"]:
+                print(f"    [+] Saving secret key...")
+                config["LISTENER"]["secret_key"] = msg
+        if msg == 'SHUTDOWN' and ENABLEREMOTECOMMANDS:
             print(f"    [+] Received remote shutdown signal!")
             subprocess.run(['shutdown', '/s', '/t', '30'])
             continue
-        elif msg == 'LOGOUT':
+        elif msg == 'LOGOUT' and ENABLEREMOTECOMMANDS:
             print(f"    [+] Received remote logout signal!")
             subprocess.run(['shutdown', '/l'])
             continue
-        elif msg == 'RESTART':
+        elif msg == 'RESTART' and ENABLEREMOTECOMMANDS:
             print(f"    [+] Received remote restart signal!")
             subprocess.run(['shutdown', '/r'])
             continue
-        elif msg == 'KILL':
+        elif msg == 'KILL' and ENABLEREMOTECOMMANDS:
             print(f"    [-] Shutting down port...")
-            kill_port(8088)
+            kill_port(config["LISTENER"]["port"])
             continue
         elif msg == 'INFO':
             print("    [+] Gathering info metrics...")
             metrics = get_agent_data()
-            s.sendto(metrics.encode('utf-8'), (addr[0], port))
+            s.sendto(metrics.encode('utf-8'), (addr[0], config["LISTENER"]["port"]))
             print(f"    [+] Sent info metrics to {addr[0]}")
             continue
         elif "agent_id" in msg or "cores_physical" in msg or "uptime_seconds" in msg:
@@ -149,21 +158,17 @@ def firewall_rule_exists(rule_name: str):
     )
     return rule_name.lower() in result.stdout.lower() and result.returncode == 0
 
-
 def initiate_listener(port: int = 8088):
     rule_name = "LabManager Listener"
-
     if firewall_rule_exists(rule_name):
         logger.info(f"Firewall rule '{rule_name}' already exists.")
         print(f"[+] Firewall rule already exists for UDP port {port}")
         return True
-
     if not is_admin():
         logger.warning("Firewall rule missing and no admin privileges.")
         print("[!] Firewall rule does not exist.")
         print("[!] Please run Lab Manager as Administrator once to create the rule.")
         return False
-
     result = subprocess.run(
         [
             "netsh", "advfirewall", "firewall", "add", "rule",
@@ -178,7 +183,6 @@ def initiate_listener(port: int = 8088):
         capture_output=True,
         text=True
     )
-
     if result.returncode == 0:
         logger.info(f"Firewall rule '{rule_name}' created successfully.")
         print(f"[+] Firewall rule created for UDP port {port}")

@@ -193,8 +193,9 @@ def handle_network():
         for dev in devices:
             print(dev)
     elif choice == '5':
-        initiate_listener(port=8088)
-        start_listener(port=8088)
+        nts = initiate_listener(port=8088)
+        if nts:
+            start_listener(port=8088)
     elif choice == "0":
         return
     else : print("Invalid choice.")

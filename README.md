@@ -383,7 +383,7 @@ From the main dashboard, pick a number/letter to enter that feature's sub-menu â
 The following issues remain and should be addressed in future iterations:
 
 - **Unit tests and integration tests** are not yet available.
-- **Shell injection risk**: `execute.py` uses `shell=True` with command construction.
+- **Shell injection risk**: `execute.py` uses `shell=True` with command construction
 - **Listener authentication**: The listener agent currently accepts unauthenticated remote commands. See Security Notes below.
 
 ### Recent Fixes (v2.1.1)

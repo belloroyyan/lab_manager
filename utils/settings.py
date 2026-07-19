@@ -14,6 +14,7 @@ home = Path(os.path.expanduser("~"))
 
 DEFAULT_SETTINGS = {
     "GENERAL" : {
+        "role" : "Admin",
         "first_run" : True,
         "school_name" : "UNIOSUN",
         "lab_name" : "UNIOSUN FOCIT Lab"
@@ -26,7 +27,7 @@ DEFAULT_SETTINGS = {
     },
     "LISTENER" : {
         "port" : 8088,
-        "secret" : "3080"
+        "secret_key" : ""
     },
     "BACKUP": {
         "skip" : "False",
@@ -100,6 +101,8 @@ def display_all_settings(settings_dict : dict, indent_level : int):
     spacing = "    " * indent_level
     for key, value in settings_dict.items():
         if isinstance(value, dict):
+            if key == "secret_key" or key == "role":
+                continue
             print(f"{spacing}{Fore.BLUE}{Style.BRIGHT}[{key.upper()}]{Style.RESET_ALL}")
             display_all_settings(value, indent_level+1)
             continue

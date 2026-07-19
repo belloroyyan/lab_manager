@@ -47,22 +47,23 @@ def display_dashboard():
     print("\n  [0] Exit Application")
     print("----------------------------------------------------------------------")
     
-def display_menu():
+def display_menu(boot=True):
     clear_shell_wi()
-    try:
-        if config["GENERAL"]["first_run"]:
-            init_settings()
-            typewriter(f"    >>> INITIALIZING LAB MANAGER...", 0.01)
-            typewriter(f"    >>> LOADING CORE MODULES AND UTILS...", 0.01)
-            time.sleep(0.3)
-            config["GENERAL"]["first_run"] = False
-            save_settings(config)
-            logger.info("First-run flag cleared for future sessions.")
-            time.sleep(1.5)
-        else: 
-            typewriter(f"     Welcome back! Booting Lab Manager main menu...", speed=0.001)
-            time.sleep(.5)
-    except Exception as e: logger.error(f"Could not retrieve 'FIRST_RUN' info. {e}")
+    if boot:
+        try:
+            if config["GENERAL"]["first_run"]:
+                init_settings()
+                typewriter(f"    >>> INITIALIZING LAB MANAGER...", 0.01)
+                typewriter(f"    >>> LOADING CORE MODULES AND UTILS...", 0.01)
+                time.sleep(0.3)
+                config["GENERAL"]["first_run"] = False
+                save_settings(config)
+                logger.info("First-run flag cleared for future sessions.")
+                time.sleep(1.5)
+            else: 
+                typewriter(f"     Welcome back! Booting Lab Manager main menu...", speed=0.001)
+                time.sleep(.5)
+        except Exception as e: logger.error(f"Could not retrieve 'FIRST_RUN' info. {e}")
 
     while True:
         display_dashboard()
