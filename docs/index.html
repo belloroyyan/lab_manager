@@ -43,11 +43,17 @@
             scroll-behavior: smooth;
         }
 
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             line-height: 1.6;
+            overflow-wrap: break-word;
         }
 
         /* Navbar Styles */
@@ -56,6 +62,7 @@
             top: 0;
             left: 0;
             right: 0;
+            width: 100%;
             height: 70px;
             background-color: var(--surface-color);
             border-bottom: 1px solid var(--border-color);
@@ -66,7 +73,13 @@
             z-index: 1000;
         }
 
+        /* Wraps logo + theme toggle. On desktop this wrapper is
+           removed from the box model (display:contents) so its two
+           children sit directly in the .navbar flex row via `order`.
+           On mobile it becomes a real row so links can drop to their
+           own scrollable line below without ever forcing page width. */
         .nav-logo {
+            order: 1;
             font-weight: 700;
             font-size: 1.25rem;
             color: var(--text-color);
@@ -74,13 +87,17 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .nav-links {
+            order: 2;
             display: flex;
             gap: 1.5rem;
             list-style: none;
             align-items: center;
+            min-width: 0;
         }
 
         .nav-links a {
@@ -88,9 +105,33 @@
             text-decoration: none;
             font-weight: 500;
             transition: color 0.2s;
+            white-space: nowrap;
         }
 
         .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
+        .navbar-end {
+            order: 3;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .nav-repo-link {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: color 0.2s;
+        }
+
+        .nav-repo-link:hover {
             color: var(--accent-color);
         }
 
@@ -101,6 +142,32 @@
             cursor: pointer;
             font-size: 1.25rem;
             padding: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        /* Hamburger: hidden until the sub-480px sidebar mode kicks in */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        /* Dimmed backdrop behind the slide-in sidebar (mobile only) */
+        .nav-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 1050;
+        }
+
+        .nav-overlay.open {
+            display: block;
         }
 
         /* Documentation Layout */
@@ -204,6 +271,7 @@
             font-size: 2rem;
             color: var(--accent-color);
             border: 2px solid var(--border-color);
+            flex-shrink: 0;
         }
 
         .dev-details h4 {
@@ -368,7 +436,43 @@
             color: var(--accent-color);
         }
 
-        /* Responsive Design */
+        /* =========================================================
+           RESPONSIVE / MEDIA QUERIES
+           Breakpoints: 920px (nav wraps to 2 rows), 900px (doc
+           layout collapses), 768px (small tablet), 480px (middle
+           nav becomes a slide-in sidebar)
+           ========================================================= */
+
+        /* At 920px and below: the logo stays top-left, Repository +
+           theme toggle stay top-right, and the middle links (Overview,
+           Project Layout, Modules, Downloads) drop to their own
+           centered row underneath — nothing is hidden yet. */
+        @media (max-width: 920px) {
+            .navbar {
+                flex-wrap: wrap;
+                height: auto;
+                row-gap: 0.5rem;
+                padding: 0.85rem 1.5rem;
+            }
+            .nav-links {
+                order: 3;
+                flex-basis: 100%;
+                width: 100%;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.75rem 1.5rem;
+            }
+            .navbar-end {
+                order: 2;
+            }
+            .container {
+                margin-top: 118px;
+            }
+        }
+
+        /* Tablet: collapse the two-column doc layout to one column,
+           drop the sidebar (contents are still reachable via scroll),
+           stack the download rows */
         @media (max-width: 900px) {
             .container {
                 grid-template-columns: 1fr;
@@ -384,28 +488,201 @@
                 display: block;
             }
         }
-        
+
+        /* Small tablet / large phone landscape */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1.25rem;
+                gap: 1.5rem;
+            }
+            h1 {
+                font-size: 1.9rem;
+            }
+            h2 {
+                font-size: 1.4rem;
+            }
+            h3 {
+                font-size: 1.1rem;
+            }
+            .dev-profile-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            .screenshot-gallery,
+            .grid-modules {
+                grid-template-columns: 1fr;
+            }
+            .tree-container {
+                font-size: 0.85rem;
+                padding: 1rem;
+                overflow-x: auto;
+            }
+            .tree-indent {
+                margin-left: 1rem;
+                padding-left: 0.5rem;
+            }
+        }
+
+        /* Small phones: the middle nav becomes a toggleable slide-in
+           sidebar behind a hamburger button. Logo + Repository +
+           theme toggle stay put in a single top row; the icon-only
+           trimming below is what keeps that row from overflowing a
+           true 320px viewport. */
+        @media (max-width: 480px) {
+            .navbar {
+                flex-wrap: nowrap;
+                height: 64px;
+                padding: 0 0.85rem;
+            }
+            .brand-text,
+            .repo-text {
+                display: none;
+            }
+            .nav-logo {
+                gap: 0;
+                font-size: 1.15rem;
+            }
+            .navbar-end {
+                gap: 0.35rem;
+            }
+            .nav-repo-link {
+                padding: 0.5rem;
+            }
+            .menu-toggle {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Slide-in sidebar */
+            .nav-links {
+                order: initial;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                width: 78vw;
+                max-width: 280px;
+                margin-top: 0;
+                background-color: var(--surface-color);
+                border-right: 1px solid var(--border-color);
+                flex-direction: column;
+                flex-wrap: nowrap;
+                align-items: flex-start;
+                justify-content: flex-start;
+                gap: 0;
+                padding: 5.5rem 1.5rem 1.5rem;
+                transform: translateX(-100%);
+                transition: transform 0.28s ease;
+                box-shadow: 6px 0 20px rgba(0,0,0,0.2);
+                z-index: 1100;
+            }
+            .nav-links.open {
+                transform: translateX(0);
+            }
+            .nav-links li {
+                width: 100%;
+            }
+            .nav-links a {
+                display: block;
+                width: 100%;
+                padding: 0.85rem 0;
+                font-size: 1.05rem;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .container {
+                width: 100%;
+                padding: 0 1rem;
+                margin-top: 90px;
+                gap: 1rem;
+            }
+            h1 {
+                font-size: 1.4rem;
+                line-height: 1.3;
+            }
+            h2 {
+                font-size: 1.15rem;
+            }
+            h3 {
+                font-size: 1rem;
+            }
+            p {
+                font-size: 0.9rem;
+            }
+            .dev-profile-card,
+            .card,
+            .screenshot-meta {
+                padding: 1rem;
+            }
+            .dev-profile-card {
+                width: 100%;
+            }
+            .dev-details p {
+                overflow-wrap: break-word;
+            }
+            .dev-avatar {
+                width: 56px;
+                height: 56px;
+                font-size: 1.5rem;
+            }
+            .download-row {
+                padding: 0.75rem 1rem;
+                width: 100%;
+            }
+            .download-row > span,
+            .download-row > div {
+                max-width: 100%;
+                overflow-wrap: break-word;
+                word-break: break-all;
+            }
+            .download-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+            .screenshot-wrapper {
+                aspect-ratio: 16 / 9;
+            }
+            .tree-container {
+                font-size: 0.75rem;
+                padding: 0.85rem;
+            }
+            .tree-indent {
+                margin-left: 0.75rem;
+                padding-left: 0.4rem;
+            }
+        }
+
     </style>
 </head>
 <body>
 
     <nav class="navbar">
         <a href="#" class="nav-logo">
-            <i class="fa-solid fa-microscope"></i> Lab Manager Docs
+            <i class="fa-solid fa-microscope"></i> <span class="brand-text">Lab Manager Docs</span>
         </a>
-        <ul class="nav-links">
-            <li><a href="#overview">Overview</a></li>
-            <li><a href="#file-tree">Project Layout</a></li>
-            <li><a href="#modules">Modules</a></li>
-            <li><a href="#downloads">Downloads</a></li>
-            <li><a href="https://github.com/belloroyyan/lab_manager" target="_blank"><i class="fa-brands fa-github"></i> Repository</a></li>
-            <li>
-                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
-                    <i class="fa-solid fa-moon"></i>
-                </button>
-            </li>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#overview" onclick="closeMobileMenu()">Overview</a></li>
+            <li><a href="#file-tree" onclick="closeMobileMenu()">Project Layout</a></li>
+            <li><a href="#modules" onclick="closeMobileMenu()">Modules</a></li>
+            <li><a href="#downloads" onclick="closeMobileMenu()">Downloads</a></li>
         </ul>
+
+        <div class="navbar-end">
+            <a href="https://github.com/belloroyyan/lab_manager" target="_blank" class="nav-repo-link">
+                <i class="fa-brands fa-github"></i> <span class="repo-text">Repository</span>
+            </a>
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+            <button class="menu-toggle" id="menuToggle" onclick="toggleMobileMenu()" aria-label="Toggle navigation menu" aria-expanded="false">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
     </nav>
+    <div class="nav-overlay" id="navOverlay" onclick="closeMobileMenu()"></div>
 
     <div class="container">
         
@@ -647,6 +924,22 @@
                 icon.className = 'fa-solid fa-sun';
                 localStorage.setItem('theme', 'dark');
             }
+        }
+
+        function toggleMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            const overlay = document.getElementById('navOverlay');
+            const btn = document.getElementById('menuToggle');
+            const isOpen = navLinks.classList.toggle('open');
+            overlay.classList.toggle('open', isOpen);
+            btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+
+        function closeMobileMenu() {
+            document.getElementById('navLinks').classList.remove('open');
+            document.getElementById('navOverlay').classList.remove('open');
+            const btn = document.getElementById('menuToggle');
+            if (btn) btn.setAttribute('aria-expanded', 'false');
         }
 
         window.addEventListener('DOMContentLoaded', () => {
