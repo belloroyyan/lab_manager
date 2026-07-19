@@ -251,6 +251,9 @@ def handle_update():
     c = check_and_update()
     if not c:
         print(f"{Fore.YELLOW}Could not get latest release. Check your connectivity.{Style.RESET_ALL}")
+    elif c == "done" or c == "fail":
+        pass
+    else : print(c)
     clear_shell()
 
 def handle_cleanup():

@@ -91,7 +91,7 @@ def check_and_update(auto_download: bool = True):
     published_at = release.get("published_at", "")
     if not is_newer_version(remote_version, APP_VERSION):
         logger.info("Application is up to date.")
-        return
+        return "Application is up to date."
     print("\n" + "="*60)
     print(f"  NEW VERSION AVAILABLE FROM GITHUB(@belloroyyan): v{remote_version}")
     print("="*60)
@@ -105,14 +105,14 @@ def check_and_update(auto_download: bool = True):
 
     if not auto_download:
         print("[-] Please download the update manually from GitHub Releases.")
-        return
+        return "done"
     choice = input("\nDownload and install this update now? (y/n): ").strip().lower()
     if choice != "y":
-        return
+        return "done"
     download_url = find_asset(release, BINARY_NAME)
     if not download_url:
         print(f"[ERROR] Could not find '{BINARY_NAME}' in the release assets.")
-        return
+        return "fail"
     TEMP_DIR.mkdir(exist_ok=True)
     new_binary = TEMP_DIR / BINARY_NAME
 
