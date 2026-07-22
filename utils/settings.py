@@ -30,7 +30,7 @@ DEFAULT_SETTINGS = {
         "secret_key" : ""
     },
     "BACKUP": {
-        "skip" : "False",
+        "skip" : False,
         "default_destination": "lab_manager_backups",
         "extensions" : {
             "Images": [".jpg", ".png", ".jpeg", ".jfif", ".jp2", ".heic", ".ico"],

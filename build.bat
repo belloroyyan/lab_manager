@@ -14,7 +14,7 @@ python -m PyInstaller --noconfirm --onefile --console ^
     --hidden-import="colorama" ^
     --hidden-import="requests" ^
     --collect-all "colorama" ^
-    --icon="lab_icon.ico" ^
+    --icon="lab_manager_logo.ico" ^
     --name="LabManager" ^
     main.py
 

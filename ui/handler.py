@@ -5,6 +5,7 @@ from core.network import NetworkHandler
 from core.backup import BackupManager
 from core.cleanup import CleanupManager
 from core.inventory import gen_soft_report, generate_lan_system_report, print_clean_report, parse_node_block
+from utils.identity import generate_and_export_key
 from utils.drive_manager import get_drives
 from utils.execute import clear_shell
 from utils.database import get_all_saved_devices
@@ -220,6 +221,7 @@ def handle_io():
   [1] Open Shell Access
   [2] Run Inventory Check
   [3] Run Inventory Check Across LAN
+  [4] Generate Secret Key
   [0] Back to Main Menu""")
     print("----------------------------------------------------------------------\n")
     choice = input(f"{GREEN}Select what i/o operation you wish to perform: {RESET}").strip()
@@ -230,6 +232,8 @@ def handle_io():
     elif choice == "3":
         generate_lan_system_report()
     elif choice == "4":
+        generate_and_export_key()
+    elif choice == "5":
         report_dir = REPORT_DIR / "inventory.tmp"
         if report_dir.exists() and report_dir.stat().st_size > 0:
             with open(report_dir, "r", encoding="utf-8") as f:
@@ -239,7 +243,7 @@ def handle_io():
                 print_clean_report(device)
         else:
             print("Report file does not exist. Run a scan first.")
-    elif choice == "5":
+    elif choice == "6":
         kill_port(8088)
     elif choice == "0":
         return
@@ -248,12 +252,7 @@ def handle_io():
 
 def handle_update():
     print("Checking for recent updates...")
-    c = check_and_update()
-    if not c:
-        print(f"{Fore.YELLOW}Could not get latest release. Check your connectivity.{Style.RESET_ALL}")
-    elif c == "done" or c == "fail":
-        pass
-    else : print(c)
+    check_and_update()
     clear_shell()
 
 def handle_cleanup():

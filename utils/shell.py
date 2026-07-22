@@ -1,6 +1,8 @@
 import subprocess
 import time
 import psutil
+import ctypes
+from pathlib import Path
 from colorama import init, Fore, Style
 from utils.logger import log_manager
 
@@ -11,6 +13,9 @@ GRAY = Fore.LIGHTBLACK_EX
 RESET = Style.RESET_ALL
 RED = Fore.RED
 GREEN = Fore.GREEN
+FILE_ATTRIBUTE_NORMAL = 0x80
+FILE_ATTRIBUTE_HIDDEN = 0x02
+FILE_ATTRIBUTE_SYSTEM = 0x04
 
 def open_shell_access():
     logger.info("User requested Shell Access.")
@@ -51,3 +56,20 @@ def kill_process_by_name(process_name):
             continue
     if count == 0:
         print(f"Info: No running process found matching '{process_name}'")
+
+def hide_file(path: Path | str) -> bool:
+    path = str(path)
+    try:
+        attrs = FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM
+        result = ctypes.windll.kernel32.SetFileAttributesW(path, attrs)
+        return result != 0
+    except Exception:
+        return False
+
+def unhide_file(path: Path | str) -> bool:
+    path = str(path)
+    try:
+        result = ctypes.windll.kernel32.SetFileAttributesW(path, FILE_ATTRIBUTE_NORMAL)
+        return result != 0
+    except Exception:
+        return False

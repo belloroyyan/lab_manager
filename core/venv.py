@@ -25,7 +25,7 @@ print(f"\n    {magenta}Found `venvs` folder within base directory.{reset}")
 print(f"    {VENV_DIR}")
 
 class VenvHandler():
-    def __int__(self):
+    def __init__(self):
         pass
     def create_venv (self, name):
         venv_name = name if name else input("\n\033[92mInput virtual environment name: \033[0m")

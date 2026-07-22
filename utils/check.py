@@ -144,3 +144,8 @@ def check_address_health(url, max_timeout):
         result["time_ms"] = round((end_time - start_time) * 1000, 2)
         logger.info(f"Ending ping requests. [{end_time}]")
     return result            
+
+def should_create_files():
+    if getattr(sys, 'frozen', False) and "listener" in sys.executable.lower():
+        return False
+    return True

@@ -112,7 +112,6 @@ def create_lab_report(data: dict):
     print(f"[+] Professional PDF generated successfully as '{report_path}'!")
 
 if __name__ == "__main__":
-    # Default test data for running this module directly
     sample_data = {
         "status": [5, 2],
         "critical": 1,

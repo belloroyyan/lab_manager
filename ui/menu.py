@@ -2,11 +2,13 @@ from ui.handler import (handle_plem, handle_sort, handle_backup, handle_git, han
 from utils.execute import clear_shell_wi
 from utils.logger import log_manager
 from utils.settings import load_settings, save_settings, init_settings
+from utils.shell import hide_file, unhide_file
+from utils.check import should_create_files
 import sys
 import time
 import os
 import platform
-from config import is_admin
+from config import IDENTITY_FILE, is_admin
 from colorama import Fore, Style, init
 
 logger = log_manager.get_logger("Menu")
@@ -52,7 +54,8 @@ def display_menu(boot=True):
     if boot:
         try:
             if config["GENERAL"]["first_run"]:
-                init_settings()
+                if should_create_files():
+                    init_settings()
                 typewriter(f"    >>> INITIALIZING LAB MANAGER...", 0.01)
                 typewriter(f"    >>> LOADING CORE MODULES AND UTILS...", 0.01)
                 time.sleep(0.3)
@@ -122,6 +125,18 @@ def display_menu(boot=True):
             time.sleep(1)
             clear_shell_wi()
             handle_help()
+        elif choice == "unhide":
+            if platform.system() == "Windows":
+                unhide_file(IDENTITY_FILE)
+                print("\n\n\033[41mIdentity file unhidden.\n\n\033[0m")
+            else:
+                print("Unhide operation is only supported on Windows.")
+        elif choice == "hide":
+            if platform.system() == "Windows":
+                hide_file(IDENTITY_FILE)
+                print("\n\n\033[41mIdentity file hidden.\n\n\033[0m")
+            else:
+                print("Hide operation is only supported on Windows.")
         elif choice == "0":
             time.sleep(.5)
             print("Exiting Lab Manager.")

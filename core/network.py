@@ -6,6 +6,7 @@ from colorama import Fore, Style
 from utils.logger import log_manager
 from utils.database import save_device, get_device
 from utils.settings import load_settings, save_settings
+from utils.identity import encrypt_message
 
 logger = log_manager.get_logger("NetworkHandler")
 
@@ -113,21 +114,31 @@ class NetworkHandler():
         return active_devices
 
     def broadcast_message(self, active_list, msg, port=8088):
+        encrypted = encrypt_message(msg)
+        if not encrypted:
+            print(f"{Fore.RED}Failed to encrypt message. Broadcast aborted.{Style.RESET_ALL}")
+            print(f"{Fore.RED}Ensure that a valid secret key is set in lab_identity.json.{Style.RESET_ALL}")
+            return
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         for ip in active_list:
             try:
                 print(f"-> Sending message to {ip}...")
-                s.sendto(msg.encode('utf-8'), (ip, port))
+                s.sendto(encrypted.encode('utf-8'), (ip, port))
             except Exception as e:
                 print(f"{Fore.YELLOW}Failed to send message to {ip}{Style.RESET_ALL}")
                 logger.exception(f'Error sending message to {ip}: {e}')
         s.close()
 
     def broadcast_msg(self, ip, msg, port=8088):
+        encrypted = encrypt_message(msg)
+        if not encrypted:
+            print(f"{Fore.RED}Failed to encrypt message. Broadcast aborted.{Style.RESET_ALL}")
+            print(f"{Fore.RED}Ensure that a valid secret key is set in lab_identity.json.{Style.RESET_ALL}")
+            return
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
             print(f"-> Sending message to {ip}...")
-            s.sendto(msg.encode('utf-8'), (ip, port))
+            s.sendto(encrypted.encode('utf-8'), (ip, port))
         except Exception as e:
             print(f"{Fore.YELLOW}Failed to send message to {ip}{Style.RESET_ALL}")
             logger.exception(f'Error sending message to {ip}: {e}')

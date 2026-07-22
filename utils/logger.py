@@ -1,9 +1,15 @@
 import logging
+import sys
 import time, os
 from pathlib import Path
 from config import (LOG_DIR, CYAN, BOLD, GREEN, YELLOW, GRAY, RED, RESET, LOG_DIR)
 
-LOG_DIR.mkdir(exist_ok=True)
+def should_create_files():
+    if getattr(sys, 'frozen', False) and "listener" in sys.executable.lower():
+        return False
+    return True
+if should_create_files():
+    LOG_DIR.mkdir(exist_ok=True)
 
 LOG_FILE = LOG_DIR / "lab.log"
 class LogHandler():

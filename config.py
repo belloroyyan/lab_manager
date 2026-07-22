@@ -13,11 +13,13 @@ def is_admin():
         return False 
 
 PROJECT_ROOT = get_project_root()
-APP_VERSION = "2.1.1"
-BINARY_NAME = "main.exe"
+APP_VERSION = "2.1.3"
 GITHUB_REPO = "belloroyyan/lab_manager"
 DESKTOP_DIR = Path(os.path.expanduser("~")) / "Desktop" / "Lab Manager"
 APPDATA_DIR = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming")) / "Lab Manager"
+PROGRAMDATA = Path(os.environ.get("PROGRAMDATA", "C:/ProgramData"))
+IDENTITY_DIR = PROGRAMDATA / "LabManager"
+IDENTITY_FILE = IDENTITY_DIR / "lab_secret.json"
 TEMP_DIR = PROJECT_ROOT / "%Temp"
 VENV_DIR = DESKTOP_DIR / "venvs"
 CORE_DIR = PROJECT_ROOT / "core"

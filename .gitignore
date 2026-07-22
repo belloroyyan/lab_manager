@@ -228,7 +228,10 @@ logs/
 lab_manager_backups/
 lab_manager.db
 LabManager.spec
-lab_icon.ico
+lab_manager_logo.ico
+listener.ico
+listener.spec
+listener.iss
 installer_output/
 %Temp/
 labmanager.iss

@@ -199,7 +199,7 @@ def generate_lan_system_report(port=8088):
     print(f"[+] Broadcast target port: {port} | Listening window: {wait_timeout}s")
     for ip in target_ips:
         try:
-            networkhandler.broadcast_msg(ip, "INFO")
+            networkhandler.broadcast_msg(ip, "LAB|INFO")
         except Exception as e:
             print(f"[-] Failed to drop query frame to {ip}.")
             logger.error(f"Failed to drop query frame to {ip}: {e}.")
