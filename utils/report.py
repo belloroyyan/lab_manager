@@ -1,5 +1,8 @@
 from fpdf import FPDF
 from datetime import datetime
+from utils.settings import load_settings
+
+config = load_settings()
 
 class LabReportPDF(FPDF):
     def header(self):
@@ -12,7 +15,7 @@ class LabReportPDF(FPDF):
         
         self.set_font("Helvetica", "", 10)
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.cell(0, 5, f"Generated: {current_time} | Scope: Main Computer Lab", ln=True, align="C")
+        self.cell(0, 5, f"Generated: {current_time} | Scope: {config.get("GENERAL").get("lab_name", "UNIOSUN FOCIT Lab")}", ln=True, align="C")
         self.ln(15)
 
     def footer(self):
@@ -56,7 +59,7 @@ def create_lab_report(data: dict):
     pdf.line(10, pdf.get_y(), 200, pdf.get_y())
     pdf.ln(5)
 
-    raw_devs = data.get("devices", {})
+    raw_devs = data.get("devices", [])
     devices = []
     for dev in raw_devs:
         device = {}
@@ -65,7 +68,7 @@ def create_lab_report(data: dict):
         device["bench"] = dev.get("bench", "N/A")
         device["ip"] = dev.get("ip_on_lan", "N/A")
         device["mac"] = dev.get("mac_address", "N/A")
-        device["cpu"] = f"{dev.get("cpu_name", "N/A")} ({dev.get("cores_physical", "?")} Cores / {dev.get("logical", "?")} Threads)"
+        device["cpu"] = f"{dev.get("cpu_name", "N/A")} ({dev.get("cores_physical", "?")} Cores / {dev.get("cores_logical", "?")} Threads)"
         device["ram"] = f"{dev.get("ram_total_gb", "?")} GB ({dev.get("ram_used_percent", "?")}% Used)"
         device["storage"] = []
         for drive in dev.get("storage", []):
@@ -73,13 +76,16 @@ def create_lab_report(data: dict):
         device["os"] = f"{dev.get("platform", "N/A")} {dev.get("release", "?")} (v{dev.get("version", "N/A")})"
         device["uptime"] = dev.get("uptime", "?")
         device["note"] = dev.get("note", [])
-        if dev["status"] == "CRITICAL":
-            device["color"] = (211, 47, 47)
-        elif dev["status"] == "WARNING":
-            device["color"] = (245, 124, 0)
-        elif dev["status"] == "HEALTHY":
-            device["color"] = (56, 142, 60)
-        else: device["color"] = (67, 133, 133)
+        try:
+            if dev["status"] == "CRITICAL":
+                device["color"] = (211, 47, 47)
+            elif dev["status"] == "WARNING":
+                device["color"] = (245, 124, 0)
+            elif dev["status"] == "HEALTHY":
+                device["color"] = (56, 142, 60)
+            else: device["color"] = (67, 133, 133)
+        except KeyError:
+            pass
         devices.append(device)
 
     for dev in devices:

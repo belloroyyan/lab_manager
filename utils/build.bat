@@ -7,8 +7,7 @@ echo ======================================================
 echo   BRIDGING LOCAL ENGINE WITH ROAMING LIBRARIES
 echo ======================================================
 
-:: 2. Run PyInstaller and MANUALLY point to the Roaming folder
-python -m PyInstaller --noconfirm --onefile --console ^
+python -m PyInstaller --noconfirm --manifest listener.manifest --onefile --console ^
     --paths "." ^
     --paths %ROAMING_LIBS% ^
     --hidden-import="colorama" ^

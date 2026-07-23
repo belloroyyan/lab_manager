@@ -71,5 +71,6 @@ def unhide_file(path: Path | str) -> bool:
     try:
         result = ctypes.windll.kernel32.SetFileAttributesW(path, FILE_ATTRIBUTE_NORMAL)
         return result != 0
-    except Exception:
+    except Exception as e:
+        print(e)
         return False

@@ -92,6 +92,7 @@ def print_clean_report(data: dict):
     agent_id = data.get("agent_id", "N/A")
     hostname = data.get("hostname", "N/A")
     current_user = data.get("current_user", "Unknown")
+    bench = data.get("bench", "N/A")
     timestamp = data.get("timestamp", "N/A")
     cpu_name = data.get("cpu_name", "Unknown")
     cpu_model = data.get("model", "Unknown")
@@ -116,6 +117,7 @@ def print_clean_report(data: dict):
 
     print(f"\n  {cyan}Host:{reset} {hostname}   |   {cyan}Agent:{reset} {agent_id}")
     print(f"  {cyan}Logged in User:{reset} {current_user}   |   {cyan}Timestamp:{reset} {timestamp}")
+    print(f" {cyan}Bench:{reset} {bench}")
 
     print(f"\n  {cyan}CPU:{reset} {cpu_model}")
     print(f"     Name     : {cpu_name}")
@@ -131,7 +133,7 @@ def print_clean_report(data: dict):
           f"({ram_color}{ram_pct}% used{reset})")
     if ram_color == red:
         issues["critical"] += 1
-        issues["note"].append(f"[!] Action Required: Clear storage space on Host: {hostname}")
+        issues["note"].append(f"Action Required: Clear storage space on Host: {hostname}")
     elif ram_color == yellow:
         issues["warning"] += 1
     print(f"\n  {cyan}Storage ({Style.BRIGHT}Type --> {drive_type}):{reset}")
@@ -143,7 +145,7 @@ def print_clean_report(data: dict):
               f"({disk_color}{use}% used{reset})")
         if disk_color == red:
             issues["critical"] += 1
-            issues["note"].append(f"[!] Action Required: Free virtual memory of disk on Host: {hostname}")
+            issues["note"].append(f"Action Required: Free virtual memory of disk on Host: {hostname}")
         elif disk_color == yellow:
             issues["warning"] += 1
     uptime = str(timedelta(seconds=int(uptime_sec)))

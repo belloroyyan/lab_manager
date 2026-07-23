@@ -10,6 +10,7 @@ from utils.drive_manager import get_drives
 from utils.execute import clear_shell
 from utils.database import get_all_saved_devices
 from utils.logger import log_manager
+from utils.report import create_lab_report
 from utils.help import display_help
 from utils.settings import (init_settings, display_all_settings, load_settings, edit_numeric_setting, edit_boolean_setting, edit_list_setting, edit_string_setting, save_settings, get_min_max)
 from utils.shell import open_shell_access, kill_port
@@ -17,6 +18,7 @@ from utils.listener import start_listener, initiate_listener
 from utils.update import check_and_update
 from config import (CYAN, BOLD, GREEN, YELLOW, GRAY, RED, DESKTOP_DIR, REPORT_DIR)
 from colorama import Fore, Back, Style, init
+from datetime import timedelta
 
 init(autoreset=True)
 logger = log_manager.get_logger("Handler")
@@ -239,8 +241,30 @@ def handle_io():
             with open(report_dir, "r", encoding="utf-8") as f:
                 data = f.read()
             parsed_data = parse_node_block(data)
+            data_e = {}
+            data_e["devices"] = []
+            data_e["status"] = [0, 0]
+            data_e["critical"] = 0
+            data_e["security"] = 0
             for i, device in parsed_data.items():
-                print_clean_report(device)
+                issues = print_clean_report(device)
+                if not issues.values():
+                    print(f"\n  No issues detected for {device["agent_id"]}")
+                    device["status"] = "HEALTHY"
+                else:
+                    print(f"\n  [{Fore.RED}Critical issues{Style.RESET_ALL} = {issues["critical"]} |{YELLOW} Warnings {RESET}= {issues["warning"]}]")
+                    device["note"] = issues["note"]
+                    device["uptime"] = str(timedelta(seconds=int(device.get("uptime_seconds"))))
+                    device["status"] = "CRITICAL" if issues["critical"] else "WARNING"
+                    data_e["critical"] += issues["critical"]
+                    data_e["security"] += issues["warning"]
+            data_e["devices"].append(device)
+        print("\n")
+        print("="*50)
+        print(f"\n{Fore.YELLOW}Note: The data above is incomplete, it does not highlight issues\n      as of the time the scan was taken. Run a live scan for a\n      complete report.")
+        choice = input(f"\n{Fore.GREEN}Generate a PDF on the latest report? (y/n): {Style.RESET_ALL}")
+        if choice == "y":
+            create_lab_report(data=data_e)
         else:
             print("Report file does not exist. Run a scan first.")
     elif choice == "6":

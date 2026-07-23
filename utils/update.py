@@ -8,7 +8,7 @@ from utils.logger import log_manager
 logger = log_manager.get_logger("Updater")
 init(autoreset=True)
 
-RELEASES_URL = f"https://github.com/{GITHUB_REPO}/releases/latest"
+RELEASES_URL = f"https://belloroyyan.github.io/lab_manager#downloads"
 API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
 
 def get_latest_release():

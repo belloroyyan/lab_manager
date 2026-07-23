@@ -1,5 +1,5 @@
 # TODO
 
 [] change releases url in update.py after deploying github pages
-[] update app version
-[] update build urls
+[tick] update app version
+[tick] update build urls

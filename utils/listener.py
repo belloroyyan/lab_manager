@@ -24,7 +24,9 @@ from utils.identity import decrypt_message, encrypt_message, load_identity
 from utils.shell import hide_file, kill_port, unhide_file
 from config import IDENTITY_FILE, IDENTITY_DIR
 
-hide_file(IDENTITY_FILE)
+c = hide_file(IDENTITY_FILE)
+if not c:
+    print(f"{Fore.YELLOW}Run as administator for proper functioning.\n{Style.RESET_ALL}")
 report_dir = REPORT_DIR / "inventory.tmp"
 n = NetworkHandler()
 ENABLEREMOTECOMMANDS = False
@@ -286,12 +288,16 @@ def verify_password(password: str, stored_hash: str):
     except Exception:
         return False
 
-def create_identity(password: str, school_name="UNIOSUN", lab_name="FOCIT Lab", log_path=None):
+def create_identity(password: str, school_name="UNIOSUN", lab_name="FOCIT Lab", log_path=None, bench=""):
     IDENTITY_DIR.mkdir(parents=True, exist_ok=True)
-    unhide_file(IDENTITY_FILE)
+    c = unhide_file(IDENTITY_FILE)
+    if not c:
+        print("Failed to access secret file. Run as admin for proper functioning.")
+        return
     identity = {
         "school_name": school_name,
         "lab_name": lab_name,
+        "bench": bench,
         "secret_key": "",
         "password_hash": hash_password(password),
         "log_path" : log_path,
@@ -310,7 +316,10 @@ def import_secret_key(path: Path):
     try:
         key = path.read_text(encoding="utf-8").strip()
         Fernet(key.encode())
-        unhide_file(IDENTITY_FILE)
+        c = unhide_file(IDENTITY_FILE)
+        if not c:
+            print("Failed to access secret file. Run as admin for proper functioning.")
+            return
         with open(IDENTITY_FILE, "r", encoding="utf-8") as f:
             identity = json.load(f)
         identity["secret_key"] = key
@@ -352,11 +361,17 @@ def run_first_time_setup():
 
     school = input("School name [UNIOSUN]: ").strip() or "UNIOSUN"
     lab    = input("Lab name [FOCIT Lab]: ").strip() or "FOCIT Lab"
+    bench = input("Bench number e.g 039: ").strip() or ""
     print("\n--- Logging Setup ---")
     print("Leave blank if you want logs only in the console.")
     log_input = input("Log file path (e.g. C:\\LabManager\\listener.log): ").strip()
     log_path = log_input if log_input else None
-    create_identity(password, school, lab, log_path)
+    try:
+        create_identity(password, school, lab, log_path, bench)
+    except PermissionError:
+        print("Access Denied. Try running as admin.")
+        time.sleep(2)
+        return
     print("\n[+] Identity file created successfully.")
     choice = input("\nImport secret.key now? (y/n): ").strip().lower()
     if choice == "y":
@@ -399,6 +414,7 @@ def run_first_time_setup():
     print("Next time it will run silently in the background.\n")
 
 def get_agent_data():
+    identity = load_identity()
     current_user = os.path.expanduser("~")
     storage_info = []
     for part in psutil.disk_partitions(all=False):
@@ -421,6 +437,7 @@ def get_agent_data():
     payload = {
         "agent_id": socket.gethostname(),
         "current_user": current_user.split("\\")[-1],
+        "bench" : identity.get("bench", ""),
         "timestamp": datetime.utcnow().isoformat() + "Z",
         "model": platform.processor(),
         "cores_physical": psutil.cpu_count(logical=False),
@@ -548,12 +565,13 @@ def initiate_listener(port: int = 8088):
         return False
 
 def main():
+    kill_port(8088)
     force_setup = "--setup" in sys.argv or "-s" in sys.argv
     if is_first_run() or force_setup:
         run_first_time_setup()
     else:
         hide_console()
     start_listener(port=8088)
-    
+
 if __name__ == "__main__":
     main()

@@ -231,7 +231,9 @@ LabManager.spec
 lab_manager_logo.ico
 listener.ico
 listener.spec
+listener.manifest
 listener.iss
+listener_task.xml
 installer_output/
 %Temp/
 labmanager.iss

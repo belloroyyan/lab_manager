@@ -117,7 +117,7 @@ class NetworkHandler():
         encrypted = encrypt_message(msg)
         if not encrypted:
             print(f"{Fore.RED}Failed to encrypt message. Broadcast aborted.{Style.RESET_ALL}")
-            print(f"{Fore.RED}Ensure that a valid secret key is set in lab_identity.json.{Style.RESET_ALL}")
+            print(f"{Fore.RED}Ensure that a valid secret key is set in secret file.{Style.RESET_ALL}")
             return
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         for ip in active_list:
@@ -133,7 +133,7 @@ class NetworkHandler():
         encrypted = encrypt_message(msg)
         if not encrypted:
             print(f"{Fore.RED}Failed to encrypt message. Broadcast aborted.{Style.RESET_ALL}")
-            print(f"{Fore.RED}Ensure that a valid secret key is set in lab_identity.json.{Style.RESET_ALL}")
+            print(f"{Fore.RED}Ensure that a valid secret key is set in secret file.{Style.RESET_ALL}")
             return
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
