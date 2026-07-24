@@ -24,9 +24,7 @@ from utils.identity import decrypt_message, encrypt_message, load_identity
 from utils.shell import hide_file, kill_port, unhide_file
 from config import IDENTITY_FILE, IDENTITY_DIR
 
-c = hide_file(IDENTITY_FILE)
-if not c:
-    print(f"{Fore.YELLOW}Run as administator for proper functioning.\n{Style.RESET_ALL}")
+hide_file(IDENTITY_FILE)
 report_dir = REPORT_DIR / "inventory.tmp"
 n = NetworkHandler()
 ENABLEREMOTECOMMANDS = False
@@ -316,7 +314,7 @@ def import_secret_key(path: Path):
     try:
         key = path.read_text(encoding="utf-8").strip()
         Fernet(key.encode())
-        c = unhide_file(IDENTITY_FILE)
+        unhide_file(IDENTITY_FILE)
         if not c:
             print("Failed to access secret file. Run as admin for proper functioning.")
             return

@@ -22,10 +22,14 @@ except (KeyboardInterrupt, EOFError):
     print("\n\n\033[41mProgram interrupted mid-load.\033[0m")
     time.sleep(2)
     sys.exit(1)
+except Exception as e:
+    print(F"Unexpected load error: {e}")
+    time.sleep(4)
 
 def main():
     try:
-        hide_file(IDENTITY_FILE)
+        if IDENTITY_FILE.exists():
+            hide_file(IDENTITY_FILE)
         log_manager.setup_logging()
         logger = log_manager.get_logger("Main")
         logger.info(f"Session launched at {time.ctime()}")

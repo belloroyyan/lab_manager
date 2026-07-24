@@ -128,13 +128,11 @@ def display_menu(boot=True):
         elif choice == "unhide":
             if platform.system() == "Windows":
                 unhide_file(IDENTITY_FILE)
-                print("\n\n\033[41mIdentity file unhidden.\n\n\033[0m")
             else:
                 print("Unhide operation is only supported on Windows.")
         elif choice == "hide":
             if platform.system() == "Windows":
                 hide_file(IDENTITY_FILE)
-                print("\n\n\033[41mIdentity file hidden.\n\n\033[0m")
             else:
                 print("Hide operation is only supported on Windows.")
         elif choice == "0":

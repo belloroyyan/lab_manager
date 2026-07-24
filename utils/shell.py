@@ -58,19 +58,26 @@ def kill_process_by_name(process_name):
         print(f"Info: No running process found matching '{process_name}'")
 
 def hide_file(path: Path | str) -> bool:
+    if not path.exists():
+        print("\n\n\033[41mError: File Not Found\n\n\033[0m")
+        return
     path = str(path)
     try:
         attrs = FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM
         result = ctypes.windll.kernel32.SetFileAttributesW(path, attrs)
+        print("\n\n\033[41mFile hidden.\n\n\033[0m")
         return result != 0
     except Exception:
         return False
 
 def unhide_file(path: Path | str) -> bool:
+    if not path.exists():
+        print("\n\n\033[41mError: File Not Found\n\n\033[0m")
+        return
     path = str(path)
     try:
         result = ctypes.windll.kernel32.SetFileAttributesW(path, FILE_ATTRIBUTE_NORMAL)
+        print("\n\n\033[41mFile unhidden.\n\n\033[0m")
         return result != 0
     except Exception as e:
-        print(e)
         return False
