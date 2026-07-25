@@ -150,7 +150,7 @@ def process_command(command: str, addr, sock, port):
     if cmd == "DISABLE_REMOTE":
         handle_disable_remote(addr, sock, port)
         return
-    if cmd in ("SHUTDOWN", "RESTART", "LOGOUT", "ABORT"):
+    if cmd in ("SHUTDOWN", "RESTART", "LOGOUT", "ABORT", "KILL"):
         if ENABLEREMOTECOMMANDS:
             if cmd == "SHUTDOWN":
                 handle_shutdown(addr, sock, port)
@@ -160,6 +160,8 @@ def process_command(command: str, addr, sock, port):
                 handle_abort(addr, sock, port)
             elif cmd == "LOGOUT":
                 handle_logout(addr, sock, port)
+            elif cmd == "KILL":
+                handle_kill(addr, sock, port)
         else:
             logger.warning(f"Rejected '{cmd}' - remote commands are disabled")
         return
@@ -287,11 +289,8 @@ def verify_password(password: str, stored_hash: str):
         return False
 
 def create_identity(password: str, school_name="UNIOSUN", lab_name="FOCIT Lab", log_path=None, bench=""):
+    unhide_file(IDENTITY_FILE)
     IDENTITY_DIR.mkdir(parents=True, exist_ok=True)
-    c = unhide_file(IDENTITY_FILE)
-    if not c:
-        print("Failed to access secret file. Run as admin for proper functioning.")
-        return
     identity = {
         "school_name": school_name,
         "lab_name": lab_name,
@@ -315,9 +314,6 @@ def import_secret_key(path: Path):
         key = path.read_text(encoding="utf-8").strip()
         Fernet(key.encode())
         unhide_file(IDENTITY_FILE)
-        if not c:
-            print("Failed to access secret file. Run as admin for proper functioning.")
-            return
         with open(IDENTITY_FILE, "r", encoding="utf-8") as f:
             identity = json.load(f)
         identity["secret_key"] = key
@@ -368,6 +364,7 @@ def run_first_time_setup():
         create_identity(password, school, lab, log_path, bench)
     except PermissionError:
         print("Access Denied. Try running as admin.")
+        print("Identity could not be created, messages may not be received.")
         time.sleep(2)
         return
     print("\n[+] Identity file created successfully.")
@@ -530,6 +527,7 @@ def firewall_rule_exists(rule_name: str):
     return rule_name.lower() in result.stdout.lower() and result.returncode == 0
 
 def initiate_listener(port: int = 8088):
+    logger = setup_listener_logger()
     rule_name = "LabManager Listener"
     if firewall_rule_exists(rule_name):
         logger = setup_listener_logger()
@@ -563,13 +561,33 @@ def initiate_listener(port: int = 8088):
         return False
 
 def main():
-    kill_port(8088)
-    force_setup = "--setup" in sys.argv or "-s" in sys.argv
-    if is_first_run() or force_setup:
-        run_first_time_setup()
-    else:
-        hide_console()
-    start_listener(port=8088)
+    try:    
+        kill_port(8088)
+        force_setup = "--setup" in sys.argv or "-s" in sys.argv
+        if is_first_run() or force_setup:
+            run_first_time_setup()
+        else:
+            hide_console()
+        
+        start_listener(port=8088)
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+    except (EOFError, KeyboardInterrupt):
+        print(f"{Fore.RED}\nClosing listener... {Style.RESET_ALL}")
+        time.sleep(2)
 
 if __name__ == "__main__":
-    main()
+    if is_admin():
+        main()
+    else:
+        if "--force" in sys.argv or "-f" in sys.argv:
+            main()
+            sys.exit(0)
+        print("Relaunching as administrator...")
+        script_path = os.path.abspath(sys.argv[0])
+        admin_args = ""
+        logger = setup_listener_logger()
+        logger.info(f"Relaunched application to elevate rights.")
+        logger.info("ADMIN Terminal Start.")
+        ctypes.windll.shell32.ShellExecuteW(None, "runas", script_path, admin_args, None, 1)
+        time.sleep(2)

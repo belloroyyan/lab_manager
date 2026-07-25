@@ -5,7 +5,7 @@ from core.network import NetworkHandler
 from core.backup import BackupManager
 from core.cleanup import CleanupManager
 from core.inventory import gen_soft_report, generate_lan_system_report, print_clean_report, parse_node_block
-from utils.identity import generate_and_export_key
+from utils.identity import generate_and_export_key, import_existing_key
 from utils.drive_manager import get_drives
 from utils.execute import clear_shell
 from utils.database import get_all_saved_devices
@@ -224,6 +224,7 @@ def handle_io():
   [2] Run Inventory Check
   [3] Run Inventory Check Across LAN
   [4] Generate Secret Key
+  [5] Import Existing Secret Key
   [0] Back to Main Menu""")
     print("----------------------------------------------------------------------\n")
     choice = input(f"{GREEN}Select what i/o operation you wish to perform: {RESET}").strip()
@@ -236,6 +237,9 @@ def handle_io():
     elif choice == "4":
         generate_and_export_key()
     elif choice == "5":
+        path = input(f"\n{GREEN}Enter path for new secret key: {RESET}")
+        import_existing_key(path)
+    elif choice == "6":
         report_dir = REPORT_DIR / "inventory.tmp"
         if report_dir.exists() and report_dir.stat().st_size > 0:
             with open(report_dir, "r", encoding="utf-8") as f:
@@ -259,15 +263,15 @@ def handle_io():
                     data_e["critical"] += issues["critical"]
                     data_e["security"] += issues["warning"]
             data_e["devices"].append(device)
-        print("\n")
-        print("="*50)
-        print(f"\n{Fore.YELLOW}Note: The data above is incomplete, it does not highlight issues\n      as of the time the scan was taken. Run a live scan for a\n      complete report.")
-        choice = input(f"\n{Fore.GREEN}Generate a PDF on the latest report? (y/n): {Style.RESET_ALL}")
-        if choice == "y":
-            create_lab_report(data=data_e)
+            print("\n")
+            print("="*50)
+            print(f"\n{Fore.YELLOW}Note: The data above is incomplete, it does not highlight issues\n      as of the time the scan was taken. Run a live scan for a\n      complete report.")
+            choice = input(f"\n{Fore.GREEN}Generate a PDF on the latest report? (y/n): {Style.RESET_ALL}")
+            if choice == "y":
+                create_lab_report(data=data_e)
         else:
             print("Report file does not exist. Run a scan first.")
-    elif choice == "6":
+    elif choice == "9":
         kill_port(8088)
     elif choice == "0":
         return

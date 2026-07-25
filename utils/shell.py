@@ -65,7 +65,6 @@ def hide_file(path: Path | str) -> bool:
     try:
         attrs = FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM
         result = ctypes.windll.kernel32.SetFileAttributesW(path, attrs)
-        print("\n\n\033[41mFile hidden.\n\n\033[0m")
         return result != 0
     except Exception:
         return False
@@ -77,7 +76,6 @@ def unhide_file(path: Path | str) -> bool:
     path = str(path)
     try:
         result = ctypes.windll.kernel32.SetFileAttributesW(path, FILE_ATTRIBUTE_NORMAL)
-        print("\n\n\033[41mFile unhidden.\n\n\033[0m")
         return result != 0
     except Exception as e:
         return False

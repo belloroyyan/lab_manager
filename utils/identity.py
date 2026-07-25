@@ -10,7 +10,7 @@ from utils.shell import hide_file, unhide_file
 def _ensure_identity_dir():
     IDENTITY_DIR.mkdir(parents=True, exist_ok=True)
 
-def load_identity() -> dict:
+def load_identity():
     if not IDENTITY_FILE.exists():
         return {}
     unhide_file(IDENTITY_FILE)
@@ -20,7 +20,7 @@ def load_identity() -> dict:
     except (json.JSONDecodeError, OSError):
         return {}
     except PermissionError:
-        print(f"{Fore.RED}Failed to edit secret file. Try running as administrator.")
+        print(f"{Fore.RED}Unable to edit secret file. Try running as administrator.")
         return
     finally:
         hide_file(IDENTITY_FILE)
@@ -33,7 +33,7 @@ def save_identity(data: dict):
         with open(IDENTITY_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4)
     except PermissionError:
-        print(f"{Fore.RED}Failed to edit secret file. Try running as administrator.")   
+        print(f"{Fore.RED}Unable to read secret file. Try running as administrator.")   
         return    
     finally:
         hide_file(IDENTITY_FILE)
@@ -86,6 +86,34 @@ def generate_and_export_key(force: bool = False):
         except Exception as e:
             print(f"\n{Fore.RED}Failed to export: {e}{Style.RESET_ALL}")
     return new_key
+
+def import_existing_key(user_path: Path):
+    path = Path(user_path)
+    if not path.exists():
+        print("Could not find secret.key file. Check path.")
+        return
+    if path.is_dir():
+        path = path / "secret.key"
+    if path.exists():
+        try:
+            key = path.read_text(encoding="utf-8").strip()
+            Fernet(key.encode())
+            unhide_file(IDENTITY_FILE)
+            with open(IDENTITY_FILE, "r", encoding="utf-8") as f:
+                identity = json.load(f)
+            identity["secret_key"] = key
+            identity["last_modified"] = datetime.now(timezone.utc).isoformat()
+            with open(IDENTITY_FILE, "w", encoding="utf-8") as f:
+                json.dump(identity, f, indent=4)
+        except Exception as e:
+            print(f"Failed to import key: {e}")
+            return
+        finally:
+            try:
+                hide_file(IDENTITY_FILE)
+            except Exception:
+                pass
+    print("Secret key updated successfully.")
 
 def get_fernet():
     identity = load_identity()

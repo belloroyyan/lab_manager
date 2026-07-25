@@ -1,6 +1,6 @@
 try:
     import sys, os
-    import colorama, time
+    import colorama, time, ctypes
     from pathlib import Path
     from config import DESKTOP_DIR, IDENTITY_DIR, IDENTITY_FILE
     if not DESKTOP_DIR.exists():
@@ -10,6 +10,7 @@ try:
     from ui.menu import display_menu
     from utils.logger import log_manager
     from utils.execute import clear_shell_wi
+    from utils.listener import is_admin
     from utils.shell import hide_file
     os.system("title Lab Manager Session")
     PROJECT_ROOT = Path(__file__).parent
@@ -49,4 +50,14 @@ def main():
         display_menu(boot=False)
 
 if __name__ == "__main__":
-    main()
+    if is_admin():
+        main()
+    else:
+        print("Relaunching as administrator...")
+        script_path = os.path.abspath(sys.argv[0])
+        admin_args = ""
+        logger = log_manager.get_logger("Main")
+        logger.info(f"Relaunched application to elevate rights and run system scans.")
+        logger.info("ADMIN Terminal Start.")
+        ctypes.windll.shell32.ShellExecuteW(None, "runas", script_path, admin_args, None, 1)
+        time.sleep(2)
