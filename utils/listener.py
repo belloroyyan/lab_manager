@@ -24,7 +24,6 @@ from utils.identity import decrypt_message, encrypt_message, load_identity
 from utils.shell import hide_file, kill_port, unhide_file
 from config import IDENTITY_FILE, IDENTITY_DIR
 
-hide_file(IDENTITY_FILE)
 report_dir = REPORT_DIR / "inventory.tmp"
 n = NetworkHandler()
 ENABLEREMOTECOMMANDS = False
@@ -55,8 +54,10 @@ def setup_listener_logger():
             logger.warning(f"Could not create log file ({e}). Continuing with console only.")
     return logger
 
+logger = setup_listener_logger()
+
 def handle_enable_remote(addr, sock, port, minutes: int = 10):
-    logger = setup_listener_logger()
+
     global ENABLEREMOTECOMMANDS, REMOTE_COMMANDS_EXPIRE_AT
     ENABLEREMOTECOMMANDS = True
     REMOTE_COMMANDS_EXPIRE_AT = time.time() + (minutes * 60)
@@ -66,14 +67,14 @@ def handle_enable_remote(addr, sock, port, minutes: int = 10):
         sock.sendto(reply.encode(), (addr[0], port))
 
 def handle_disable_remote(addr, sock, port):
-    logger = setup_listener_logger()
+
     global ENABLEREMOTECOMMANDS, REMOTE_COMMANDS_EXPIRE_AT
     ENABLEREMOTECOMMANDS = False
     REMOTE_COMMANDS_EXPIRE_AT = 0
     logger.warning(f"Remote commands disabled by {addr[0]}")
 
 def handle_info(addr, sock, port):
-    logger = setup_listener_logger()
+
     logger.info(f"Authenticated INFO request from {addr[0]}")
     metrics = get_agent_data()
     encrypted_reply = encrypt_message(metrics)
@@ -89,27 +90,27 @@ def handle_ping(addr, sock, port):
         sock.sendto(reply.encode(), (addr[0], port))
 
 def handle_shutdown(addr, sock, port):
-    logger = setup_listener_logger()
+
     logger.info(f"SHUTDOWN command received from {addr[0]}")
     subprocess.run(["shutdown", "/s", "/t", "30"])
 
 def handle_abort(addr, sock, port):
-    logger = setup_listener_logger()
-    logger.info(f"SHUTDOWN command received from {addr[0]}")
+
+    logger.info(f"ABORT command received from {addr[0]}")
     subprocess.run(["shutdown", "/a"])
 
 def handle_restart(addr, sock, port):
-    logger = setup_listener_logger()
+
     logger.info(f"RESTART command received from {addr[0]}")
     subprocess.run(["shutdown", "/r", "/t", "30"])
 
 def handle_logout(addr, sock, port):
-    logger = setup_listener_logger()
+
     logger.info(f"LOGOUT command received from {addr[0]}")
     subprocess.run(["shutdown", "/l"])
 
 def handle_kill(addr, sock, port):
-    logger = setup_listener_logger()
+
     logger.info(f"KILL_PORT command received from {addr[0]}")
     print("Shutting down listener.")
     kill_port(8088)
@@ -128,7 +129,7 @@ DANGEROUS_COMMANDS = {
 }
 
 def process_command(command: str, addr, sock, port):
-    logger = setup_listener_logger()
+
     global ENABLEREMOTECOMMANDS
     if ENABLEREMOTECOMMANDS and time.time() > REMOTE_COMMANDS_EXPIRE_AT:
         ENABLEREMOTECOMMANDS = False
@@ -227,7 +228,7 @@ def create_startup_task():
   <Principals>
     <Principal id="Author">
       <LogonType>InteractiveToken</LogonType>
-      <RunLevel>LeastPrivilege</RunLevel>
+      <RunLevel>HighestAvailable</RunLevel>
     </Principal>
   </Principals>
   <Settings>
@@ -322,7 +323,7 @@ def import_secret_key(path: Path):
             json.dump(identity, f, indent=4)
         return True
     except Exception as e:
-        logger = setup_listener_logger()
+    
         logger.exception(f"Failed to import key: {e}")
         return False
     finally:
@@ -426,7 +427,7 @@ def get_agent_data():
                 }
             )
         except PermissionError:
-            logger = setup_listener_logger()
+        
             logger.warning(f"Permission denied for disk partition: {part.mountpoint}")
             continue
     payload = {
@@ -487,7 +488,7 @@ def start_listener(port=8088):
         print(f"Port {port} is already in use! Try a different one.")
         return
     print(f"Agent is listening for messages on port {port}...")
-    logger = setup_listener_logger()
+
     logger.info(f"Listener started on UDP port {port} at {datetime.now()}.")
     while True:
         data, addr = s.recvfrom(2048)
@@ -527,10 +528,10 @@ def firewall_rule_exists(rule_name: str):
     return rule_name.lower() in result.stdout.lower() and result.returncode == 0
 
 def initiate_listener(port: int = 8088):
-    logger = setup_listener_logger()
+
     rule_name = "LabManager Listener"
     if firewall_rule_exists(rule_name):
-        logger = setup_listener_logger()
+    
         logger.info(f"Firewall rule '{rule_name}' already exists.")
         print(f"[+] Firewall rule already exists for UDP port {port}")
         return True
@@ -586,7 +587,7 @@ if __name__ == "__main__":
         print("Relaunching as administrator...")
         script_path = os.path.abspath(sys.argv[0])
         admin_args = ""
-        logger = setup_listener_logger()
+    
         logger.info(f"Relaunched application to elevate rights.")
         logger.info("ADMIN Terminal Start.")
         ctypes.windll.shell32.ShellExecuteW(None, "runas", script_path, admin_args, None, 1)
