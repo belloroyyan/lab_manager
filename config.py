@@ -1,10 +1,15 @@
 from pathlib import Path
 import os, sys, ctypes, subprocess
 
+_STANDALONE = True
+
 def get_project_root():
     if getattr(sys, 'frozen', False):
+        global _STANDALONE 
+        _STANDALONE = True
         return Path(sys.executable).resolve().parent
     else:
+        _STANDALONE = False
         return Path(__file__).resolve().parent
 def is_admin():
     try:

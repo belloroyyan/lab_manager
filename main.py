@@ -2,7 +2,7 @@ try:
     import sys, os
     import colorama, time, ctypes
     from pathlib import Path
-    from config import DESKTOP_DIR, IDENTITY_DIR, IDENTITY_FILE
+    from config import DESKTOP_DIR, IDENTITY_DIR, IDENTITY_FILE, _STANDALONE
     if not DESKTOP_DIR.exists():
         os.mkdir(DESKTOP_DIR)
     if not IDENTITY_DIR.exists():
@@ -50,6 +50,8 @@ def main():
         display_menu(boot=False)
 
 if __name__ == "__main__":
+    if not _STANDALONE:
+        main()
     if is_admin():
         main()
     else:

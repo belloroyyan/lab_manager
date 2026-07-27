@@ -100,14 +100,25 @@ def create_lab_report(data: dict):
         
         pdf.set_font("Helvetica", "", 10)
         pdf.set_x(15)
+
+        storage_list = dev.get("storage") or []
+        if storage_list:
+            storage_text = storage_list[0]
+        else:
+            storage_text = "No storage info"
+        
+        note_list = dev.get("note") or ["No notes"]
+        note_text = note_list[0] if isinstance(note_list, list) else str(note_list)
         
         details = (
-            f"-> Network Setup : IP: {dev['ip']}   |   MAC: {dev['mac']}\n"
-            f"-> Processor     : {dev['cpu']}\n"
-            f"-> RAM Status    : {dev['ram']}\n"
-            f"-> Disk Space    : {dev['storage'][0]}\n"
-            f"-> Operating Sys : {dev['os']}  (Uptime: {dev['uptime']})\n"
-            f"-> System Note   : {dev['note'][0]}"
+            f"-> Network Setup : IP: {dev.get('ip', dev.get('ip_on_lan', 'N/A'))}   |   "
+            f"MAC: {dev.get('mac', dev.get('mac_address', 'N/A'))}\n"
+            f"-> Processor     : {dev.get('cpu', dev.get('cpu_name', 'N/A'))}\n"
+            f"-> RAM Status    : {dev.get('ram', f"{dev.get('ram_total_gb', '?')} GB")}\n"
+            f"-> Disk Space    : {storage_text}\n"
+            f"-> Operating Sys : {dev.get('os', f"{dev.get('platform', '')} {dev.get('release', '')}")}  "
+            f"(Uptime: {dev.get('uptime', '?')})\n"
+            f"-> System Note   : {note_text}"
         )
         pdf.multi_cell(0, 6, details, border='L')
         pdf.ln(6)

@@ -241,36 +241,62 @@ def handle_io():
         import_existing_key(path)
     elif choice == "6":
         report_dir = REPORT_DIR / "inventory.tmp"
-        if report_dir.exists() and report_dir.stat().st_size > 0:
-            with open(report_dir, "r", encoding="utf-8") as f:
-                data = f.read()
-            parsed_data = parse_node_block(data)
-            data_e = {}
-            data_e["devices"] = []
-            data_e["status"] = [0, 0]
-            data_e["critical"] = 0
-            data_e["security"] = 0
-            for i, device in parsed_data.items():
-                issues = print_clean_report(device)
-                if not issues.values():
-                    print(f"\n  No issues detected for {device["agent_id"]}")
-                    device["status"] = "HEALTHY"
-                else:
-                    print(f"\n  [{Fore.RED}Critical issues{Style.RESET_ALL} = {issues["critical"]} |{YELLOW} Warnings {RESET}= {issues["warning"]}]")
-                    device["note"] = issues["note"]
-                    device["uptime"] = str(timedelta(seconds=int(device.get("uptime_seconds"))))
-                    device["status"] = "CRITICAL" if issues["critical"] else "WARNING"
-                    data_e["critical"] += issues["critical"]
-                    data_e["security"] += issues["warning"]
-            data_e["devices"].append(device)
-            print("\n")
-            print("="*50)
-            print(f"\n{Fore.YELLOW}Note: The data above is incomplete, it does not highlight issues\n      as of the time the scan was taken. Run a live scan for a\n      complete report.")
-            choice = input(f"\n{Fore.GREEN}Generate a PDF on the latest report? (y/n): {Style.RESET_ALL}")
-            if choice == "y":
-                create_lab_report(data=data_e)
-        else:
+
+        if not (report_dir.exists() and report_dir.stat().st_size > 0):
             print("Report file does not exist. Run a scan first.")
+            return
+
+        with open(report_dir, "r", encoding="utf-8") as f:
+            raw_data = f.read()
+
+        parsed_data = parse_node_block(raw_data)
+
+        if not parsed_data:
+            print("No valid device data found in the last scan.")
+            return
+
+        data_e = {
+            "devices": [],
+            "status": [0, 0],          # [total_seen, responded] – we don’t have this info from old file
+            "critical": 0,
+            "security": 0
+        }
+
+        for agent_id, device in parsed_data.items():
+            issues = print_clean_report(device)
+
+            # Ensure required fields always exist
+            if not any(issues.values()):
+                print(f"\n  No issues detected for {device.get('agent_id', agent_id)}")
+                device["status"] = "HEALTHY"
+                device["note"] = ["All systems operational"]
+            else:
+                print(f"\n  [{Fore.RED}Critical issues{Style.RESET_ALL} = {issues['critical']} | "
+                    f"{YELLOW}Warnings{RESET} = {issues['warning']}]")
+                device["note"] = issues.get("note") or ["See console for details"]
+                device["status"] = "CRITICAL" if issues["critical"] else "WARNING"
+                data_e["critical"] += issues["critical"]
+                data_e["security"] += issues["warning"]
+
+            # These must always be present for create_lab_report
+            device["uptime"] = str(timedelta(seconds=int(float(device.get("uptime_seconds", 0)))))
+            
+            if not device.get("storage"):
+                device["storage"] = [{
+                    "total_gb": "?",
+                    "free_gb": "?",
+                    "used_percent": "?"
+                }]
+
+            data_e["devices"].append(device)
+
+        print("\n" + "=" * 50)
+        print(f"\n{Fore.YELLOW}Note: This report is based on the last saved scan.\n"
+            f"      It may not reflect the current live state of the lab.{RESET}")
+
+        choice = input(f"\n{Fore.GREEN}Generate a PDF from this data? (y/n): {Style.RESET_ALL}").strip().lower()
+        if choice == "y":
+            create_lab_report(data=data_e)
     elif choice == "9":
         kill_port(8088)
     elif choice == "0":

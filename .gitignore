@@ -233,6 +233,8 @@ listener.ico
 listener.spec
 listener.manifest
 listener.iss
+LabManager.exe
+listener.exe
 listener_task.xml
 installer_output/
 %Temp/

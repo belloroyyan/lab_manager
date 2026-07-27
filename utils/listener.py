@@ -591,4 +591,4 @@ if __name__ == "__main__":
         logger.info(f"Relaunched application to elevate rights.")
         logger.info("ADMIN Terminal Start.")
         ctypes.windll.shell32.ShellExecuteW(None, "runas", script_path, admin_args, None, 1)
-        time.sleep(2)
+        time.sleep()
