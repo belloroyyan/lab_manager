@@ -236,6 +236,7 @@ listener.iss
 LabManager.exe
 listener.exe
 listener_task.xml
+manager.zip
 installer_output/
 %Temp/
 labmanager.iss
