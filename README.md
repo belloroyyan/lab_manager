@@ -87,7 +87,7 @@ lab_manager/
 └── lab_manager.db            # SQLite registry (created at runtime)
 ```
 
-Several folders are created on demand outside the project root, on the user's **Desktop** (see `config.py`): `Desktop/Lab Manager/venvs`, `git_repos`, `lab_manager_backups`, and `reports`. The encrypted device identity lives under `%PROGRAMDATA%/LabManager/lab_secret.json`, separate from the project tree.
+Several folders are created on demand outside the project root, on the user's **Desktop** (see `config.py`): `Desktop/Lab Manager/venvs`, `git_repos`, `lab_manager_backups`, and `reports`. The encrypted device identity lives under `lab_secret.json`, separate from the project tree.
 
 ---
 
@@ -177,7 +177,7 @@ Note: the actual shared encryption key used for agent traffic lives in the separ
 - **`logs/lab.log`** — application logging, viewable/summarized/clearable from the Logs menu.
 - **`Desktop/Lab Manager/reports/inventory.tmp`** — scratch file where the admin console accumulates decrypted telemetry replies from agents during a LAN-wide inventory scan.
 - **`Desktop/Lab Manager/{git_repos, venvs, lab_manager_backups, reports}`** — working directories created on demand by their respective modules.
-- **`%PROGRAMDATA%/LabManager/lab_secret.json`** — the per-device identity file (Windows hidden attribute set): operator password hash, shared Fernet key, school/lab name, bench number, and optional log path. Used by both the admin console (to encrypt outgoing messages) and the listener (to decrypt/authenticate incoming ones).
+- **`lab_secret.json`** — the per-device identity file (Windows hidden attribute set): operator password hash, shared Fernet key, school/lab name, bench number, and optional log path. Used by both the admin console (to encrypt outgoing messages) and the listener (to decrypt/authenticate incoming ones).
 
 ---
 
@@ -194,7 +194,7 @@ Resolves the project root (handles both normal script execution and a PyInstalle
 ### `ui/` — Menu & Input Handling
 
 **`menu.py`**
-Renders the main dashboard and runs the input loop. On first run it initializes default settings and plays a "typewriter" boot sequence; on later runs it shows a shorter welcome. Dispatches numeric/letter choices to the corresponding `handle_*` function in `handler.py`. Also exposes hidden `hide` / `unhide` commands that toggle the Windows hidden attribute on the identity file.
+Renders the main dashboard and runs the input loop. On first run it initializes default settings and plays a "typewriter" boot sequence; on later runs it shows a shorter welcome. Dispatches numeric/letter choices to the corresponding `handle_*` function in `handler.py`.
 
 **`handler.py`**
 One `handle_*` function per top-level menu item. Each prints a sub-menu, takes a choice, and calls into the relevant `core`/`utils` class or function — e.g. `handle_network()` drives `NetworkHandler`, `handle_backup()` drives `BackupManager`, `handle_io()` also handles secret-key generation/import and rebuilding a PDF report from the last saved LAN scan, `handle_update()` drives the GitHub update checker, etc.
