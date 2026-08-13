@@ -9,6 +9,7 @@ from core.inventory import gen_soft_report, generate_lan_system_report, print_cl
 from utils.identity import generate_and_export_key, import_existing_key
 from utils.drive_manager import get_drives
 from utils.execute import clear_shell
+from utils.env import print_saved_env_status
 from utils.database import get_all_saved_devices
 from utils.logger import log_manager
 from utils.report import create_lab_report
@@ -149,6 +150,7 @@ def handle_venv():
   [1] Create Virtual Environment
   [2] Update Venv Packages
   [3] Install Packages
+  [4] List Installed Packages
   [0] Back to Main Menu""")
     print("----------------------------------------------------------------------\n")
     choice = input(F"{GREEN}Select what venv operation you wish to perform: {RESET}").strip()
@@ -158,6 +160,8 @@ def handle_venv():
         venv_handler.update_venv_deps()
     elif choice == "3":
         venv_handler.install_packages()
+    elif choice == "4":
+        venv_handler.list_installed_packages()
     elif choice == "0":
         return
     else : print("Invalid choice.")
@@ -213,13 +217,16 @@ def handle_syscheck():
 
   [1] Environment Status Check
   [2] Run System Scans
+  [3] View Last Environment Status Report
   [0] Back to Main Menu""")
     print("----------------------------------------------------------------------\n")
-    choice = input(f"{GREEN}Select what system check you wish to perform: {RESET}").strip()
+    choice = input(f"{GREEN}Select what system check op you wish to perform: {RESET}").strip()
     if choice == "1":
         h.show_env_status()
     elif choice == "2":
         h.sys_scan()
+    elif choice == "3":
+        print_saved_env_status()
     elif choice == "0":
         return
     else : print("Invalid choice.")

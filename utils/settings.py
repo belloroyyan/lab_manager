@@ -1,7 +1,7 @@
 import json, os
 from pathlib import Path
 from colorama import Fore, Style, init
-from config import SETTINGS
+from config import SETTINGS, APP_VERSION
 from utils.logger import log_manager
 
 init(autoreset=True)
@@ -14,6 +14,7 @@ home = Path(os.path.expanduser("~"))
 
 DEFAULT_SETTINGS = {
     "GENERAL" : {
+        "app_ver": APP_VERSION,
         "role" : "Admin",
         "first_run" : True,
         "school_name" : "UNIOSUN",
@@ -73,6 +74,7 @@ DEFAULT_SETTINGS = {
     "HEALTH": {
         "dirs_to_check": [f"{home / "Desktop" / "Lab Manager" / "venvs"}"],
         "list_packages": True,
+        "save_reports": True,
     }
 }
 

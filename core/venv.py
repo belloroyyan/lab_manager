@@ -24,6 +24,11 @@ time.sleep(.5)
 print(f"\n    {magenta}Found `venvs` folder within base directory.{reset}")
 print(f"    {VENV_DIR}")
 
+def is_venv(path):
+    if (path / "pyvenv.cfg").exists() and (path / "Scripts" / "python.exe").exists() and (path / "Scripts" / "pip.exe").exists():
+        return True
+    return False
+
 class VenvHandler():
     def __init__(self):
         pass
@@ -68,7 +73,7 @@ class VenvHandler():
         venv_to_update = input("\n\033[92mEnter venv name ('all' to update all venvs): \033[0m")
         venv_to_update_path = Path(venv_to_update)
         if venv_to_update_path.exists():
-            if (venv_to_update_path / "pyvenv.cfg").exists() and (venv_to_update_path / "Scripts" / "python.exe").exists() and(venv_to_update_path / "Scripts" / "pip.exe").exists():
+            if is_venv(venv_to_update_path):
                 print(f"{venv_to_update_path.name} is a venv. Parsing through libs...")
                 py_path = venv_to_update_path / "Scripts" / "python.exe"
                 pip_cmd = [str(py_path), "-m", "pip", "install", "--upgrade", "pip"]
@@ -178,7 +183,7 @@ class VenvHandler():
             print("ERROR: Venv not found.")
     
     def install_packages(self):
-        venv_to_install_to = input("\033[92mEnter venv name: \033[0m")
+        venv_to_install_to = input("\n\033[92mEnter venv name: \033[0m")
         package_to_install = input("\n\033[92mEnter package name: \033[0m")
         venv_path = Path(input("\n\033[92mEnter venv path (leave blank if in default): \033[0m"))
         packages_to_install = package_to_install.split(" ")
@@ -201,3 +206,54 @@ class VenvHandler():
         else:
             print("ERROR: Venv not found")
             print(f"{venv_to_install_to} not found in {VENV_DIR}")
+
+    def list_installed_packages(self):
+        venv_to_list = input("\n\033[92mEnter venv name: \033[0m")
+        venv_path = input("\n\033[92mEnter venv path (leave blank if in default): \033[0m")
+        if venv_path:
+            venv_path = Path(venv_path)
+            if venv_path.exists():
+                print(f"{venv_path.name} exists. Parsing python libs...")
+                venv_path_py_path = venv_path / "Scripts" / "python.exe"
+                freeze_command = [str(venv_path_py_path), "-m", "pip", "freeze"]
+                print(f"Listing installed packages for '{venv_path.name}'...")
+                try:
+                    freeze_result = subprocess.run(freeze_command,capture_output=True,text=True,check=True)
+                    packages_installed = freeze_result.stdout.strip().splitlines()
+                    if not packages_installed:
+                        print("No packages found in the virtual environment.")
+                        return
+                    print(f"Found {len(packages_installed)} packages in '{venv_path.name}'\n")
+                    for line in packages_installed:
+                        package_name = line.split('==')[0].strip()
+                        print(f"   -- Package Name: {package_name}")
+                        print(f"   -- Package Version: {line.split('==')[1].strip()}")
+                        print("     "+("-"*15))
+                except subprocess.CalledProcessError as e:
+                    print(f"\nFreeze command failed.")
+                    logger.error(f"Freeze command failed. Error log: {e}")            
+                except Exception as e:
+                    print(f"\033[91m\nAn unexpected error occurred. Check logs for details.\033[0m")
+                return
+        elif venv_to_list in os.listdir(VENV_DIR):
+            venv_to_list = os.path.join(VENV_DIR, venv_to_list)
+            venv_to_list_py_path = os.path.join(venv_to_list, 'scripts', 'python.exe')
+            freeze_command = [venv_to_list_py_path, '-m', 'pip', 'freeze']
+            print(f"Listing installed packages for '{venv_to_list}'...")
+            try:
+                freeze_result = subprocess.run(freeze_command,capture_output=True,text=True,check=True)
+                packages_installed = freeze_result.stdout.strip().splitlines()
+                if not packages_installed:
+                    print("No packages found in the virtual environment.")
+                    return
+                print(f"Found {len(packages_installed)} packages in {venv_to_list}")
+                for line in packages_installed:
+                    package_name = line.split('==')[0].strip()
+                    print(f"   -- Package Name: {package_name}")
+                    print(f"   -- Package Version: {line.split('==')[1].strip()}")
+                    print("     "+("-"*15))
+            except subprocess.CalledProcessError as e:
+                print(f"\nFreeze command failed.")
+                logger.error(f"Freeze command failed. Error log: {e}")            
+            except Exception as e:
+                print(f"\033[91m\nAn unexpected error occurred. Check logs for details.\033[0m")

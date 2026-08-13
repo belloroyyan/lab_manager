@@ -1,6 +1,7 @@
 import time, subprocess, os, ctypes, sys
 from pathlib import Path
 from utils.check import is_admin
+from utils.env import save_env_status
 from utils.execute import execute_task
 from utils.logger import log_manager
 from utils.settings import load_settings
@@ -20,6 +21,11 @@ class HealthCheck:
             print("\n--- Running system checks ---\n")
             print("\n")
             print("This might take a while. You may run other tasks.\n\n")
+            data = {
+                "python_version": subprocess.run(["python", "--version"], capture_output=True, text=True).stdout.strip(),
+                "git_version": subprocess.run(["git", "--version"], capture_output=True, text=True).stdout.strip(),
+                "is_admin": is_admin(),
+                "venvs": [],}
             base_dirs = input("Enter paths to check for venvs: ")
             elements_to_scan = []
             if base_dirs:
@@ -47,6 +53,7 @@ class HealthCheck:
                         logger.info(f"{folder} is a virtual environment")
                         venvs.append(folder)
             logger.info(f"{len(venvs)} virtual environments are present in the base directory.")
+            data["venvs_found"] = len(venvs)
             if not venvs:
                 print("No venv is present inside the root folder. Skipping...")
             for venv in venvs:
@@ -68,6 +75,14 @@ class HealthCheck:
                             print(f"   -- Package Name: {package_name}")
                             print(f"   -- Package Version: {line.split('==')[1].strip()}")
                             print("     "+("-"*15))
+                    data["venvs"].append({
+                        "name": venv.name,
+                        "path": str(venv),
+                        "pip_version": pip_result.stdout.strip(),
+                        "package_count": len(packages_to_upgrade),
+                        "packages": packages_to_upgrade if list_packages else []
+                    })
+                    save_env_status(data)
                 except subprocess.CalledProcessError as e:
                     print(f"\nFreeze command failed.")
                     logger.error(f"Freeze command failed. Error log: {e}")            

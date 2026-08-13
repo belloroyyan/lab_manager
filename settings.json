@@ -140,6 +140,8 @@
     "HEALTH": {
         "dirs_to_check": [
             "C:\\Users\\Kato\\Desktop\\Lab Manager\\venvs"
-        ]
+        ],
+        "list_packages": false,
+        "save_reports": true
     }
 }
