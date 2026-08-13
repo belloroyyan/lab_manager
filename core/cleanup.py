@@ -81,7 +81,6 @@ class CleanupManager:
             choice = input("Empty Recycle Bin? (y/n): ").lower()
             if choice != 'y':
                 return
-
         try:
             import winshell
             winshell.recycle_bin().empty(confirm=False)
