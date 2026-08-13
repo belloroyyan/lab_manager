@@ -45,14 +45,17 @@ def main():
         logger.exception(f"Unexpected error in main: {e}")
         time.sleep(1)
     finally:
-        logger.info(f"Session ended at {time.ctime()}")
+        from ui.menu import _EXIT
+        if _EXIT:
+            logger.info(f"Session ended at {time.ctime()}")  
         hide_file(IDENTITY_FILE)
-        display_menu(boot=False)
+        if not _EXIT:
+            display_menu(boot=False)
 
 if __name__ == "__main__":
     if not _STANDALONE:
         main()
-    if is_admin():
+    elif is_admin():
         main()
     else:
         print("Relaunching as administrator...")

@@ -1,5 +1,5 @@
 import sqlite3, time
-from config import PROJECT_ROOT
+from config import PROJECT_ROOT, _STANDALONE
 from colorama import init, Style, Fore
 from utils.check import should_create_files
 from utils.logger import log_manager
@@ -67,7 +67,8 @@ def get_all_saved_devices():
     conn.close()
     return rows
 
-print(f"\n    {magenta}Inititating database...")
+if not _STANDALONE:
+    print(f"\n    {magenta}Inititating database...")
 if should_create_files():
     init_db()
 time.sleep(.5)

@@ -1,5 +1,5 @@
 from pathlib import Path
-import os, sys, ctypes, subprocess
+import os, sys, ctypes
 
 _STANDALONE = True
 

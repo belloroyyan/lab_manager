@@ -28,36 +28,41 @@ class VenvHandler():
     def __init__(self):
         pass
     def create_venv (self, name):
-        venv_name = name if name else input("\n\033[92mInput virtual environment name: \033[0m")
-        path = input(f"\n\033[92mInput new virtual environment {Style.RESET_ALL}'{venv_name}'{Fore.GREEN} destination path: \033[0m")
+        venv_names = name if name else input("\n\033[92mInput virtual environment name: \033[0m")
+        venv_names_list = venv_names.split(" ")
+        if len(venv_names_list) == 1:
+            path = input(f"\n\033[92mInput new virtual environment {Style.RESET_ALL}'{venv_names_list[0]}'{Fore.GREEN} destination path: \033[0m")
+        elif len(venv_names_list) > 1:
+            path = input(f"\n\033[92mInput path for {len(venv_names_list)} virtual environments: \033[0m")
         if not path:
             path = VENV_DIR
         path = Path(path)
         global_py = find_system_python()
         if not global_py:
-            print("Python is not installed on this device.")
-            print("Cannot create virtual environment.")
+            print(f"{Fore.YELLOW}Python is not installed on this device.")
+            print(f"Cannot create virtual environment.{Style.RESET_ALL}")
             return
-        if os.path.exists(path / venv_name):
-            print(f"\nVirtual environment '{venv_name}' already exists.\n")
-            return
-        print(f"\nCreating virtual environment '{venv_name}' via {global_py}...\n")
-        try:
-            cmd_string = f'"{global_py}" -m venv "{venv_name}"'
-            subprocess.run(cmd_string, check=True, shell=True, capture_output=False)
-            logger.info(f"Created {venv_name} successfully")
-            print("  Venv created successfully!\n")
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Error creating virtual environment: {e}")
-            print("Error: Failed to create Venv.\n")
-            print(f"Command executed: {e.cmd}")
-            print(f"Stdout: {e.stdout.strip()}")
-            print(f"Stderr: {e.stderr.strip()}")
-        try:
-            shutil.move(Path(os.getcwd()) / venv_name, path)
-            print(f"Moved to {venv_name} to {path}.")
-        except Exception as e:
-            print(f"[ERROR] Failed to move venv {venv_name} to destination.\nCheck working directory of the application.")
+        for venv_name in venv_names_list:
+            if os.path.exists(path / venv_name):
+                print(f"\nVirtual environment '{venv_name}' already exists.\n")
+                return
+            print(f"\n[+] Creating virtual environment '{venv_name}' via {global_py}...")
+            try:
+                cmd_string = f'"{global_py}" -m venv "{venv_name}"'
+                subprocess.run(cmd_string, check=True, shell=True, capture_output=False)
+                logger.info(f"Created {venv_name} successfully")
+                print("  Venv created successfully!")
+            except subprocess.CalledProcessError as e:
+                logger.error(f"Error creating virtual environment: {e}")
+                print("Error: Failed to create Venv.\n")
+                print(f"Command executed: {e.cmd}")
+                print(f"Stdout: {e.stdout.strip()}")
+                print(f"Stderr: {e.stderr.strip()}")
+            try:
+                shutil.move(Path(os.getcwd()) / venv_name, path)
+                print(f"Moved {venv_name} to {path}.")
+            except Exception as e:
+                print(f"{Fore.RED}[ERROR] Failed to move venv {venv_name} to destination.\nCheck working directory of the application.{Style.RESET_ALL}")
         
     def update_venv_deps(self):
         venv_to_update = input("\n\033[92mEnter venv name ('all' to update all venvs): \033[0m")

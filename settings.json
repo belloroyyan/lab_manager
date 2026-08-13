@@ -1,5 +1,6 @@
 {
     "GENERAL": {
+        "role": "Admin",
         "first_run": false,
         "school_name": "UNIOSUN",
         "lab_name": "UNIOSUN FOCIT Lab"
@@ -12,10 +13,11 @@
     },
     "LISTENER": {
         "port": 8088,
-        "secret": "3080"
+        "secret_key": "",
+        "listening_window": 3
     },
     "BACKUP": {
-        "skip": "False",
+        "skip": false,
         "default_destination": "lab_manager_backups",
         "extensions": {
             "Images": [
@@ -134,5 +136,10 @@
     "SECURITY": {
         "manage_firewall_rules": true,
         "require_admin_privileges": false
+    },
+    "HEALTH": {
+        "dirs_to_check": [
+            "C:\\Users\\Kato\\Desktop\\Lab Manager\\venvs"
+        ]
     }
 }

@@ -27,7 +27,8 @@ DEFAULT_SETTINGS = {
     },
     "LISTENER" : {
         "port" : 8088,
-        "secret_key" : ""
+        "secret_key" : "",
+        "listening_window": 3
     },
     "BACKUP": {
         "skip" : False,
@@ -56,7 +57,7 @@ DEFAULT_SETTINGS = {
         },
         "VS Code" : {
             "command" : ["code"],
-            "paths" : [r"C:\Users\Kato\AppData\Local\Programs\Microsoft VS Code\Code.exe"],
+            "paths" : [f"{home}\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"],
             "version_flag" : "--v"
         },
         "Git" : {
@@ -68,6 +69,9 @@ DEFAULT_SETTINGS = {
     "SECURITY": {
         "manage_firewall_rules": True,
         "require_admin_privileges": False
+    },
+    "HEALTH": {
+        "dirs_to_check": [f"{home / "Desktop" / "Lab Manager" / "venvs"}"]
     }
 }
 

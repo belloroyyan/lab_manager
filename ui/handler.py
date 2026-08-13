@@ -4,6 +4,7 @@ from core.venv import VenvHandler
 from core.network import NetworkHandler
 from core.backup import BackupManager
 from core.cleanup import CleanupManager
+from core.health import show_env_status
 from core.inventory import gen_soft_report, generate_lan_system_report, print_clean_report, parse_node_block
 from utils.identity import generate_and_export_key, import_existing_key
 from utils.drive_manager import get_drives
@@ -205,15 +206,8 @@ def handle_network():
     clear_shell()
 
 def handle_syscheck():
-    print(f"""======================================================================
-                            SYSTEM HEALTH MENU                        
-======================================================================
-
-  [1] Scan Local Area Network
-  [2] Broadcast Message
-  [3] Retrieved Stored Records
-  [0] Back to Main Menu""")
-    print("----------------------------------------------------------------------\n")
+    show_env_status()
+    clear_shell()
 
 def handle_io():
     print(f"""======================================================================
@@ -257,15 +251,13 @@ def handle_io():
 
         data_e = {
             "devices": [],
-            "status": [0, 0],          # [total_seen, responded] – we don’t have this info from old file
+            "status": [0, 0],
             "critical": 0,
             "security": 0
         }
 
         for agent_id, device in parsed_data.items():
             issues = print_clean_report(device)
-
-            # Ensure required fields always exist
             if not any(issues.values()):
                 print(f"\n  No issues detected for {device.get('agent_id', agent_id)}")
                 device["status"] = "HEALTHY"
@@ -277,19 +269,14 @@ def handle_io():
                 device["status"] = "CRITICAL" if issues["critical"] else "WARNING"
                 data_e["critical"] += issues["critical"]
                 data_e["security"] += issues["warning"]
-
-            # These must always be present for create_lab_report
             device["uptime"] = str(timedelta(seconds=int(float(device.get("uptime_seconds", 0)))))
-            
             if not device.get("storage"):
                 device["storage"] = [{
                     "total_gb": "?",
                     "free_gb": "?",
                     "used_percent": "?"
                 }]
-
             data_e["devices"].append(device)
-
         print("\n" + "=" * 50)
         print(f"\n{Fore.YELLOW}Note: This report is based on the last saved scan.\n"
             f"      It may not reflect the current live state of the lab.{RESET}")

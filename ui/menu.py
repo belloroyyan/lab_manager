@@ -14,6 +14,7 @@ from colorama import Fore, Style, init
 logger = log_manager.get_logger("Menu")
 init(autoreset=True)
 config = load_settings()
+_EXIT = False
 MAIN = Fore.CYAN + Style.BRIGHT
 DIM = Fore.WHITE + Style.DIM
 GOLD = Fore.YELLOW
@@ -109,10 +110,20 @@ def display_menu(boot=True):
             time.sleep(1)
             clear_shell_wi()
             handle_io()
-        elif choice == "l" or choice == 'log':
+        elif choice == "l":
             time.sleep(1)
             clear_shell_wi()
             handle_log()
+        elif choice == 'log':
+            time.sleep(1)
+            clear_shell_wi()
+            try:
+                from utils.logger import log_manager
+                from utils.execute import clear_shell
+                log_manager.analyze_logs(50)
+            except ImportError:
+                print(f"\n\n{Fore.YELLOW}Failed to analyze logs, try log menu instead.{Style.RESET_ALL}")
+            clear_shell()
         elif choice == "s" or choice == 'settings':
             time.sleep(1)
             clear_shell_wi()
@@ -136,6 +147,8 @@ def display_menu(boot=True):
             else:
                 print("Hide operation is only supported on Windows.")
         elif choice == "0":
+            global _EXIT
+            _EXIT = True
             time.sleep(.5)
             print("Exiting Lab Manager.")
             break

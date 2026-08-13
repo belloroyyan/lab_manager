@@ -59,7 +59,7 @@ def kill_process_by_name(process_name):
 
 def hide_file(path: Path | str) -> bool:
     if not path.exists():
-        print("\n\n\033[41mError: File Not Found\n\n\033[0m")
+        print("\n\n\033[41mError: File Not Found\033[0m")
         return
     path = str(path)
     try:
@@ -71,7 +71,7 @@ def hide_file(path: Path | str) -> bool:
 
 def unhide_file(path: Path | str) -> bool:
     if not path.exists():
-        print("\n\n\033[41mError: File Not Found\n\n\033[0m")
+        print("\n\n\033[41mError: File Not Found\033[0m")
         return
     path = str(path)
     try:

@@ -393,7 +393,7 @@ def run_first_time_setup():
     else:
         print("\n[!] You are not running as Administrator.")
         print("[!] Firewall rule for UDP port 8088 will not be created.")
-        print("[!] Please run Lab Manager as Administrator once to create the rule.")
+        print("[!] Please run Lab Manager Listener as Administrator once to create the rule.")
     print("\n--- Startup Task ---")
     if task_exists():
         print("[+] Startup task already exists.")
