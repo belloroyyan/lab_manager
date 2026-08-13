@@ -18,7 +18,7 @@ def is_admin():
         return False 
 
 PROJECT_ROOT = get_project_root()
-APP_VERSION = "2.1.3"
+APP_VERSION = "2.1.4"
 GITHUB_REPO = "belloroyyan/lab_manager"
 DESKTOP_DIR = Path(os.path.expanduser("~")) / "Desktop" / "Lab Manager"
 APPDATA_DIR = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming")) / "Lab Manager"
