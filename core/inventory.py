@@ -192,7 +192,7 @@ def generate_lan_system_report(port=8088):
     if not target_ips:
         print(f"{Fore.YELLOW}Failed to scan LAN.{Style.RESET_ALL}")
         return
-    wait_timeout = len(target_ips) * settings.get("LISTENER")["listening_window"]
+    wait_timeout = len(target_ips) * settings.get("LISTENER").get("listening_window", 5)
     report_dir = REPORT_DIR / "inventory.tmp"
     if report_dir.exists():
         os.remove(report_dir)

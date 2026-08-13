@@ -71,7 +71,8 @@ DEFAULT_SETTINGS = {
         "require_admin_privileges": False
     },
     "HEALTH": {
-        "dirs_to_check": [f"{home / "Desktop" / "Lab Manager" / "venvs"}"]
+        "dirs_to_check": [f"{home / "Desktop" / "Lab Manager" / "venvs"}"],
+        "list_packages": True,
     }
 }
 

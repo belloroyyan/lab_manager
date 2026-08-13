@@ -4,7 +4,7 @@ from core.venv import VenvHandler
 from core.network import NetworkHandler
 from core.backup import BackupManager
 from core.cleanup import CleanupManager
-from core.health import show_env_status
+from core.health import HealthCheck
 from core.inventory import gen_soft_report, generate_lan_system_report, print_clean_report, parse_node_block
 from utils.identity import generate_and_export_key, import_existing_key
 from utils.drive_manager import get_drives
@@ -206,7 +206,23 @@ def handle_network():
     clear_shell()
 
 def handle_syscheck():
-    show_env_status()
+    h = HealthCheck()
+    print(f"""======================================================================
+                                    SYSTEM CHECK MENU                        
+======================================================================
+
+  [1] Environment Status Check
+  [2] Run System Scans
+  [0] Back to Main Menu""")
+    print("----------------------------------------------------------------------\n")
+    choice = input(f"{GREEN}Select what system check you wish to perform: {RESET}").strip()
+    if choice == "1":
+        h.show_env_status()
+    elif choice == "2":
+        h.sys_scan()
+    elif choice == "0":
+        return
+    else : print("Invalid choice.")
     clear_shell()
 
 def handle_io():

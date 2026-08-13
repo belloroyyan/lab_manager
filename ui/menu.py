@@ -120,7 +120,7 @@ def display_menu(boot=True):
             try:
                 from utils.logger import log_manager
                 from utils.execute import clear_shell
-                log_manager.analyze_logs(50)
+                log_manager.analyze_logs(20)
             except ImportError:
                 print(f"\n\n{Fore.YELLOW}Failed to analyze logs, try log menu instead.{Style.RESET_ALL}")
             clear_shell()
